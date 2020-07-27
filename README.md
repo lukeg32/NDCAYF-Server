@@ -16,11 +16,8 @@ Lightweight first person shooter focused on multiplayer LAN-based gameplay, and 
 
 ## Dependencies
 * cmake
-* glfw3 (glfw-x11 on archlinux)
-* glew
 * assimp
 * bullet
-* glm
 
 ## Linux Installation:
 1. Clone this git repo
@@ -33,7 +30,12 @@ Lightweight first person shooter focused on multiplayer LAN-based gameplay, and 
 1. [Our more detailed, recommended method](https://en.wikipedia.org/wiki/Criticism_of_Linux)
 
 ## Current Progress
-* Almost nothing
+* Server response to pings
+
+## Todo
+* add ability to see the lag in ms
+* add ability to "connect" with clients
+* add periodic server dump
 
 ## Links and Resources
 
