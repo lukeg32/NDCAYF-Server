@@ -27,7 +27,7 @@ Lightweight first person shooter focused on multiplayer LAN-based gameplay, and 
 2. Ensure you have all proper dependencies installed
 3. `cd` into the repo directory and run `cmake ./*`
 4. Run `make`
-5. Run `./NDCAYF-Server
+5. Run `./NDCAYF-Server`
 
 ## Windows Installation:
 1. [Our more detailed, recommended method](https://en.wikipedia.org/wiki/Criticism_of_Linux)
