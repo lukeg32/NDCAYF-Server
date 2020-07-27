@@ -1,0 +1,55 @@
+{
+    "root": [
+        {
+            "name": "menu item 1",
+            "format": "default",
+            "type": "menu",
+            "target": "m1"
+        },
+        {
+            "name": "menu item 2",
+            "format": "default",
+            "type": "menu",
+            "target": "m2"
+        },
+        {
+            "name": "menu item 3",
+            "format": "default",
+            "type": "menu",
+            "target": "m3"
+        },
+        {
+            "name": "FPScounter",
+            "format": "default",
+            "type": "setting",
+            "target": "FPScounter"
+        },
+        {
+            "name": "settings item 2",
+            "format": "default",
+            "type": "setting",
+            "target": "setting 2"
+        }
+    ],
+    "m1":[
+        {   "name": "submenu 1",
+            "format": "default",
+            "type": "menu",
+            "target": "root"
+        }
+    ],
+    "m2":[
+        {   "name": "submenu 2",
+            "format": "default",
+            "type": "menu",
+            "target": "root"
+        }
+    ],
+    "m3":[
+        {   "name": "ur mum gae",
+            "format": "default",
+            "type": "menu",
+            "target": "m2"
+        }
+    ]
+}
