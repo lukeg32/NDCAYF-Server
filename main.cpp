@@ -24,13 +24,28 @@
 
 int main()
 {
-    // netowrk
-    bool networkLoaded = false;
+    int sock;
+    char buf[BUFSIZE];
+    struct sockaddr_in fromAddr;
+    int addrlen;
+    int type;
+
+    if ((sock = makeSocket()) < 0)
+    {
+        perror("Failed to make a socket\n");
+        return -1;
+    }
+
 
     while(true){
+        fromAddr = recieve(buf, sock);
 
-        //setup
+        type = processMsg(buf);
+
+        sendMsg(type, sock, fromAddr);
     }
+
+    close(sock);
 
     return 0;
 }
