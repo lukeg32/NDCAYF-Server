@@ -1,9 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <netdb.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 
-#define cow "This is a cow"
+int runServer();
+struct sockaddr_in recieve(char buf[], int inSock);
+int makeSocket();
+void composeMsg(char msg[], char protocol[], char extra[] = "none");
+int sendMsg(int type, int sock, struct sockaddr_in addr);
+int processMsg(char msg[]);
