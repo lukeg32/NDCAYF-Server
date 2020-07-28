@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 #include <btBulletDynamicsCommon.h>
+#include <string>
+#include <iostream>
 
 #include "util/bulletDebug/collisiondebugdrawer.hpp"
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
@@ -22,6 +24,7 @@
 #include "util/networking/networkConfig.hpp"
 #include "util/networking/server.hpp"
 
+using namespace std;
 int clientNum;
 
 
@@ -32,8 +35,12 @@ int main()
     struct sockaddr_in fromAddr, *ptrAddr;
     int addrlen;
     int type;
+    char extra[BUFSIZE];
     bool waitingForMsg = false;
     struct MsgPacket lastPacket, *ptrPacket;
+
+    unsigned long long time;
+    unsigned long long start = getMilliSeconds();
 
     struct timeval tv;
 
@@ -47,8 +54,8 @@ int main()
 
 
     struct SpawnPoint B;
-    B.x = 20;
-    B.y = 20;
+    B.x = 0;
+    B.y = -20;
     B.z = 0;
 
     struct SpawnPoint spawns[2] = {A, B};
@@ -57,6 +64,9 @@ int main()
     struct Entity players[MAXPLAYERS];
     int numPlayers = 0;
 
+    struct Client clients[MAXPLAYERS];
+    int numClients = 0;
+
     if ((sock = makeSocket()) < 0)
     {
         perror("Failed to make a socket\n");
@@ -64,12 +74,14 @@ int main()
     }
 
 
+
     while(true){
         // check inbox
+        time = getMilliSeconds();
 
         if (!waitingForMsg)
         {
-            printf("Waiting on port %d\nTime: %llu\n", PORT, getMilliSeconds());
+            printf("Waiting on port %d\nTime: %llu\n", PORT, time);
             waitingForMsg = true;
         }
 
@@ -81,33 +93,74 @@ int main()
             printf("\tFrom %s\n", inet_ntoa(fromAddr.sin_addr));
             printf("\tAt %llu\n", getMilliSeconds());
 
-            lastPacket.addr = ptrAddr;
+            lastPacket.addr = fromAddr;
+
             type = processMsg(buf, ptrPacket);
 
-            if (type == CONNECTME)
+            lastPacket.type = type;
+
+            if (type == CONNECT)
             {
-                // make new player
-                struct Entity player;
-                player.x = spawns[nextSpawn].x;
-                player.y = spawns[nextSpawn].y;
-                player.z = spawns[nextSpawn].z;
+                int id;
+                // make a new player
+                players[numPlayers].x = spawns[nextSpawn].x;
+                players[numPlayers].y = spawns[nextSpawn].y;
+                players[numPlayers].z = spawns[nextSpawn].z;
                 nextSpawn++;
+                if (nextSpawn == 2)
+                    nextSpawn = 0;
 
-                players[numPlayers] = player;
-
-                struct Client aClient;
-                aClient.id = clientNum;
-                aClient.addr = fromAddr;
-                aClient.entity = numPlayers;
+                // make a client
+                clients[numClients].id = numClients; // useless
+                clients[numClients].addr = fromAddr;
+                clients[numClients].entity = numPlayers;
 
                 numPlayers++;
 
+                id = numClients;
+                numClients++;
+                //printf("%d\t%d\n", id, numClients);
+
+                // i need to dump all entityes to the new client so it can make them
+                sprintf(extra, "%d&", id);
+
+                for (int i = 0; i < numClients; i++)
+                {
+                    sprintf(extra, "%s&%d&%d,%d,%d", extra, i,
+                        players[clients[i].entity].x, players[clients[i].entity].y, players[clients[i].entity].z);
+                }
+
+                sendMsg(type, sock, fromAddr, extra);
+            }
+            else if (type == MOVE)
+            {
+                // add this to list of moves
+            }
+            else if (type == PONG)
+            {
+                sendMsg(type, sock, fromAddr);
             }
 
-            sendMsg(type, sock, fromAddr);
         }
 
         //check time
+        if (time - start >= 100)
+        {
+            start = time;
+            char temp[BUFSIZE];
+            for (int i = 0; i < numClients; i++)
+            {
+                sprintf(temp, "%s&%d&%d,%d,%d", temp, i,
+                    players[clients[i].entity].x, players[clients[i].entity].y, players[clients[i].entity].z);
+            }
+
+            printf("Dumping, %s\n", temp);
+
+            for (int i = 0; i < numClients; i++)
+            {
+                sendMsg(DUMP, sock, clients[i].addr, temp);
+            }
+        }
     }
 
     close(sock);

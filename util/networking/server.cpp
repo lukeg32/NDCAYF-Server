@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
+#include <string>
 
 #include "networkConfig.hpp"
 #include "server.hpp"
@@ -14,6 +15,7 @@
 char hostname[128];
 Client clients[MAXPLAYERS];
 
+using namespace std;
 
 unsigned long long getMilliSeconds()
 {
@@ -110,29 +112,35 @@ int processMsg(char msg[], struct MsgPacket *packet)
     char clientKey[128];
     char name[128];
     char protocol[128];
+    int ptl;
     char time[256];
     strcpy(clientKey, strtok(msg, "$"));
 
     if (strcmp(clientKey, SUPERSECRETKEY_CLIENT) == 0)
     {
         strcpy(name, strtok(NULL, "$"));
+
+        // get protocol and make it a number
         strcpy(protocol, strtok(NULL, "$"));
+        ptl = std::stoi(protocol);
+
         strcpy(time, strtok(NULL, "$"));
 
-        //strcpy(packet->name, name);
-        //strcpy(packet->ptl, protocol);
-        //packet->time = atoll(time);
+
+        strcpy(packet->name, name);
+        packet->ptl = ptl;
+        packet->time = atoll(time);
 
 
-        if (strcmp(protocol, PING) == 0)
+        if (ptl == PING)
         {
             printf("Send response\n");
-            return SENDPONG;
+            return PONG;
         }
-        else if (strcmp(protocol, CONNECT) == 0)
+        else if (ptl ==  CONNECT)
         {
-            printf("\"Connecting\" client");
-            return CONNECTME;
+            printf("\"Connecting\" client\n");
+            return CONNECT;
         }
     }
     else
@@ -144,18 +152,36 @@ int processMsg(char msg[], struct MsgPacket *packet)
 
 
 // send msg
-int sendMsg(int type, int sock, struct sockaddr_in addr)
+int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[])
 {
     char msg[BUFSIZE];
+    char num[10];
     bool sendMsg = false;
     socklen_t addrlen = sizeof(addr);
 
-    if (type == SENDPONG)
+    if (type == PONG)
     {
-        composeMsg(msg, PONG);
+
+        sprintf(num, "%d", PONG);
+        composeMsg(msg, num);
+    }
+    else if (type == CONNECT)
+    {
+        sprintf(num, "%d", CONNECT);
+
+        composeMsg(msg, num, extra);
+    }
+    else if (type == DUMP)
+    {
+        sprintf(num, "%d", DUMP);
+
+        composeMsg(msg, num, extra);
     }
 
+    if (type != DUMP)
+    {
     printf("Sending %s\n", msg);
+    }
 
     if (sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&addr, addrlen) < 0)
     {

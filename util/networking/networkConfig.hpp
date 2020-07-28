@@ -10,16 +10,21 @@
 #define SUPERSECRETKEY_CLIENT "ndcayfclient"
 
 // protocols
+/*
 #define PING "ping"
 #define PONG "pong"
 #define CONNECT "connect"
+#define MOVE "imove"
+*/
 
 // helpers
-#define SENDPONG 1
-#define SENDPING 2
-#define ISSTATE 3
+#define PONG 1
+#define PING 2
+#define STATE 3
 #define SPEED 4
-#define CONNECTME 5
+#define CONNECT 5
+#define MOVE 6
+#define DUMP 7
 
 #define MAXSERVERS 5
 #define MAXPLAYERS 20

@@ -25,16 +25,17 @@ struct SpawnPoint
 
 struct MsgPacket
 {
-    sockaddr_in *addr;
+    sockaddr_in addr;
     char name[128];
-    char ptl[128];
+    int ptl;
+    int type;
     unsigned long long time;
 };
 
 int recieve(char buf[], int inSock, struct sockaddr_in *fromAddr);
 int makeSocket();
 void composeMsg(char msg[], char protocol[], char extra[] = "none");
-int sendMsg(int type, int sock, struct sockaddr_in addr);
+int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[] = "none");
 unsigned long long getMilliSeconds();
 int processMsg(char msg[], struct MsgPacket *packet);
 
