@@ -38,7 +38,6 @@ int main()
     struct timeval tv;
 
     clientNum = 0;
-    ptrAddr = &fromAddr;
     ptrPacket = &lastPacket;
 
     struct SpawnPoint A;
@@ -79,7 +78,7 @@ int main()
             waitingForMsg = false;
 
             printf("\tMsg %s\n", buf);
-            printf("\tFrom %s\n", inet_ntoa(ptrAddr->sin_addr));
+            printf("\tFrom %s\n", inet_ntoa(fromAddr.sin_addr));
             printf("\tAt %llu\n", getMilliSeconds());
 
             lastPacket.addr = ptrAddr;

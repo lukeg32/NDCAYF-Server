@@ -77,14 +77,14 @@ int recieve(char buf[], int inSock, sockaddr_in *fromAddr)
 {
     int recvlen;                                /* # bytes received */
     int success = -1;
-    socklen_t addrlen = sizeof(fromAddr);        /* length of addresses */
+    socklen_t addrlen = sizeof(*fromAddr);        /* length of addresses */
 
     recvlen = recvfrom(inSock, buf, BUFSIZE, 0, (struct sockaddr *)fromAddr, &addrlen);
     if (recvlen > 0) {
         printf("Received %d bytes\n", recvlen);
         success = 1;
         buf[recvlen] = 0;
-        //printf("Received message: \"%s\"\n", buf);
+        //printf("From: %s\n", inet_ntoa(fromAddr->sin_addr));
     }
 
     return success;
