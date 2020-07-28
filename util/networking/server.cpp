@@ -9,11 +9,13 @@
 #include <unistd.h>
 
 #include "networkConfig.hpp"
+#include "server.hpp"
 
 char hostname[128];
+Client clients[MAXPLAYERS];
 
 
-void composeMsg(char msg[], char protocol[], char extra[] = "none")
+unsigned long long getMilliSeconds()
 {
     struct timeval tv;
 
@@ -22,6 +24,13 @@ void composeMsg(char msg[], char protocol[], char extra[] = "none")
     unsigned long long millisecondsSinceEpoch =
         (unsigned long long)(tv.tv_sec) * 1000 +
         (unsigned long long)(tv.tv_usec) / 1000;
+
+    return millisecondsSinceEpoch;
+}
+
+void composeMsg(char msg[], char protocol[], char extra[])
+{
+    unsigned long long millisecondsSinceEpoch = getMilliSeconds();
 
     sprintf(msg, "%s$%s$%s$%llu$%s", SUPERSECRETKEY_SERVER, hostname, protocol, millisecondsSinceEpoch, extra);
 }
@@ -38,6 +47,14 @@ int makeSocket()
         return -1;
     }
 
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = 10000;
+
+    if (setsockopt(inSock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
+    {
+        printf("Time out option failed\n");
+    }
 
     gethostname(hostname, 128);
     //sprintf(lanReply, "%s$%s", SUPERSECRETKEY_SERVER, hostname);
@@ -56,21 +73,21 @@ int makeSocket()
 }
 
 
-struct sockaddr_in recieve(char buf[], int inSock)
+int recieve(char buf[], int inSock, sockaddr_in *fromAddr)
 {
     int recvlen;                                /* # bytes received */
-    struct sockaddr_in fromAddr;
+    int success = -1;
     socklen_t addrlen = sizeof(fromAddr);        /* length of addresses */
 
-    printf("Waiting on port %d\n", PORT);
-    recvlen = recvfrom(inSock, buf, BUFSIZE, 0, (struct sockaddr *)&fromAddr, &addrlen);
-    printf("Received %d bytes\n", recvlen);
+    recvlen = recvfrom(inSock, buf, BUFSIZE, 0, (struct sockaddr *)fromAddr, &addrlen);
     if (recvlen > 0) {
+        printf("Received %d bytes\n", recvlen);
+        success = 1;
         buf[recvlen] = 0;
-        printf("Received message: \"%s\"\n", buf);
+        //printf("Received message: \"%s\"\n", buf);
     }
 
-    return fromAddr;
+    return success;
 }
 
 /*
@@ -88,23 +105,34 @@ struct sockaddr_in recieve(char buf[], int inSock)
  */
 
 // sees if this is a ping, or a client sending its state
-int processMsg(char msg[])
+int processMsg(char msg[], struct MsgPacket *packet)
 {
     char clientKey[128];
     char name[128];
     char protocol[128];
+    char time[256];
     strcpy(clientKey, strtok(msg, "$"));
 
     if (strcmp(clientKey, SUPERSECRETKEY_CLIENT) == 0)
     {
         strcpy(name, strtok(NULL, "$"));
         strcpy(protocol, strtok(NULL, "$"));
+        strcpy(time, strtok(NULL, "$"));
+
+        //strcpy(packet->name, name);
+        //strcpy(packet->ptl, protocol);
+        //packet->time = atoll(time);
 
 
         if (strcmp(protocol, PING) == 0)
         {
             printf("Send response\n");
             return SENDPONG;
+        }
+        else if (strcmp(protocol, CONNECT) == 0)
+        {
+            printf("\"Connecting\" client");
+            return CONNECTME;
         }
     }
     else
