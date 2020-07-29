@@ -147,7 +147,7 @@ int main()
         if (time - start >= 100)
         {
             start = time;
-            char temp[BUFSIZE];
+            char temp[BUFSIZE] = "";
             for (int i = 0; i < numClients; i++)
             {
                 sprintf(temp, "%s&%d&%d,%d,%d", temp, i,
