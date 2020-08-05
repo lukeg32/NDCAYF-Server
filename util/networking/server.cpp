@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string>
+#include <iostream>
 
 #include "networkConfig.hpp"
 #include "server.hpp"
@@ -35,6 +36,56 @@ void composeMsg(char msg[], char protocol[], char extra[])
     unsigned long long millisecondsSinceEpoch = getMilliSeconds();
 
     sprintf(msg, "%s$%s$%s$%llu$%s", SUPERSECRETKEY_SERVER, hostname, protocol, millisecondsSinceEpoch, extra);
+}
+
+
+void getParts(std::string parts[], std::string raw, int amount, std::string deli)
+{
+    size_t pos = 0;
+    int cur = 0;
+    std::string token;
+    while ((pos = raw.find(deli)) != std::string::npos) {
+        token = raw.substr(0, pos);
+        parts[cur] = token;
+        cur++;
+        raw.erase(0, pos + deli.length());
+    }
+    parts[cur] = raw;
+}
+
+
+void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], int *id)
+{
+    std::string raw = packet.data;
+    std::string parts[3];
+    std::string partdeli("&");
+
+    std::string floats[3];
+    std::string subdeli(",");
+
+    float x, y, z;
+
+
+    // get the front raw
+    getParts(parts, raw, 3, partdeli);
+    for (int i = 0; i < 3; i++)
+    {
+        printf("%s\n", parts[i].c_str());
+    }
+
+
+    // get the floats
+    getParts(floats, parts[0], 3, subdeli);
+
+    //apply
+    *front = glm::vec3(std::stof(floats[0]), std::stof(floats[1]), std::stof(floats[2]));
+
+    // the moves
+    strcpy(moves, parts[1].c_str());
+
+    // get id
+    *id = stoi(parts[2]);
+
 }
 
 int makeSocket()
@@ -112,7 +163,10 @@ int processMsg(char msg[], struct MsgPacket *packet)
     char clientKey[128];
     char name[128];
     char protocol[128];
+    char idstr[100];
+    char data[BUFSIZE];
     int ptl;
+    int clientID;
     char time[256];
     strcpy(clientKey, strtok(msg, "$"));
 
@@ -126,11 +180,16 @@ int processMsg(char msg[], struct MsgPacket *packet)
 
         strcpy(time, strtok(NULL, "$"));
 
+        strcpy(idstr, strtok(NULL, "$"));
+        clientID = std::stoi(idstr);
+
+        strcpy(data, strtok(NULL, "$"));
 
         strcpy(packet->name, name);
+        strcpy(packet->data, data);
         packet->ptl = ptl;
         packet->time = atoll(time);
-
+        packet->id = clientID;
 
         if (ptl == PING)
         {
@@ -141,6 +200,11 @@ int processMsg(char msg[], struct MsgPacket *packet)
         {
             printf("\"Connecting\" client\n");
             return CONNECT;
+        }
+        else if (ptl == MOVE)
+        {
+            printf("Got new move\n");
+            return MOVE;
         }
     }
     else

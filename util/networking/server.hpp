@@ -1,5 +1,6 @@
 #ifndef SERVER_H
 #define SERVER_H
+#include <glm/glm.hpp>
 
 
 struct Client
@@ -11,16 +12,17 @@ struct Client
 
 struct Entity
 {
-    int x;
-    int y;
-    int z;
+    glm::vec3 pos;
+    glm::vec3 front;
+    glm::vec3 oldPos;
+    glm::vec3 oldFront;
+    char moves[BUFSIZE * 2];
 };
 
 struct SpawnPoint
 {
-    int x;
-    int y;
-    int z;
+    glm::vec3 pos;
+    glm::vec3 front;
 };
 
 struct MsgPacket
@@ -28,7 +30,8 @@ struct MsgPacket
     sockaddr_in addr;
     char name[128];
     int ptl;
-    int type;
+    int id;
+    char data[BUFSIZE];
     unsigned long long time;
 };
 
@@ -38,5 +41,7 @@ void composeMsg(char msg[], char protocol[], char extra[] = "none");
 int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[] = "none");
 unsigned long long getMilliSeconds();
 int processMsg(char msg[], struct MsgPacket *packet);
+void getMovePoint(struct MsgPacket, glm::vec3 *front, char moves[], int *id);
+void getParts(std::string parts[], std::string raw, int amount, std::string deli);
 
 #endif

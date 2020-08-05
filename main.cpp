@@ -7,6 +7,7 @@
 #include <btBulletDynamicsCommon.h>
 #include <string>
 #include <iostream>
+#include <glm/glm.hpp>
 
 #include "util/bulletDebug/collisiondebugdrawer.hpp"
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
@@ -26,10 +27,40 @@
 
 using namespace std;
 int clientNum;
-
+const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main()
 {
+    struct MsgPacket test;
+    char msg[] = "ndcayfclient$luke$6$2345656745$0$0.0,0.0,0.0&&1234";
+
+    printf("running\n");
+    printf("%d\n", processMsg(msg, &test));
+    /*
+     *
+struct MsgPacket
+{
+    sockaddr_in addr;
+    char name[128];
+    int ptl;
+    int id;
+    char data[4048];
+    unsigned long long time;
+};
+     *
+     */
+    printf("addr %s, name %s, ptl %d, clid %d, data %s, time %llu\n", inet_ntoa(test.addr.sin_addr), test.name, test.ptl, test.id, test.data, test.time);
+
+
+    glm::vec3 testFront;
+    char testmoves[10];
+    int testid;
+
+    getMovePoint(test, &testFront, testmoves, &testid);
+    printf("id %d, move %s,  vec %.2f, %.2f, %.2f", testid, testmoves, testFront.x, testFront.y, testFront.z);
+
+    return 0;
+
     int sock;
     char buf[BUFSIZE];
     struct sockaddr_in fromAddr, *ptrAddr;
@@ -48,15 +79,13 @@ int main()
     ptrPacket = &lastPacket;
 
     struct SpawnPoint A;
-    A.x = 0;
-    A.y = 20;
-    A.z = 0;
+    A.pos = glm::vec3(0, 20, 0);
+    A.front = glm::vec3(0, 0, 0);
 
 
     struct SpawnPoint B;
-    B.x = 0;
-    B.y = -20;
-    B.z = 0;
+    B.pos = glm::vec3(0, -20, 0);
+    B.front = glm::vec3(10, 10, 10);
 
     struct SpawnPoint spawns[2] = {A, B};
     int nextSpawn = 0;
@@ -97,15 +126,14 @@ int main()
 
             type = processMsg(buf, ptrPacket);
 
-            lastPacket.type = type;
-
             if (type == CONNECT)
             {
                 int id;
                 // make a new player
-                players[numPlayers].x = spawns[nextSpawn].x;
-                players[numPlayers].y = spawns[nextSpawn].y;
-                players[numPlayers].z = spawns[nextSpawn].z;
+                players[numPlayers].pos = spawns[nextSpawn].front;
+                players[numPlayers].front = spawns[nextSpawn].front;
+
+                // use all the spawns
                 nextSpawn++;
                 if (nextSpawn == 2)
                     nextSpawn = 0;
@@ -121,20 +149,49 @@ int main()
                 numClients++;
                 //printf("%d\t%d\n", id, numClients);
 
+                // just tell the client its start, then the client will wait for the dump to actually start
                 // i need to dump all entityes to the new client so it can make them
-                sprintf(extra, "%d&", id);
+                sprintf(extra, "%d", id);
 
                 for (int i = 0; i < numClients; i++)
                 {
-                    sprintf(extra, "%s&%d&%d,%d,%d", extra, i,
-                        players[clients[i].entity].x, players[clients[i].entity].y, players[clients[i].entity].z);
+                    sprintf(extra, "%s&%d&%.2f,%.2f,%.2f", extra, i,
+                        players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
                 }
 
                 sendMsg(type, sock, fromAddr, extra);
             }
             else if (type == MOVE)
             {
-                // add this to list of moves
+                // validate, too lazy to do rn
+                if (true)
+                {
+                    //calculate the position when the packet info is applied
+                    glm::vec3 cameraFront;
+                    std:string moves;
+                    int id;
+
+                    /*
+                    getMovePoint(lastPacket, &cameraFront, &moves, &id);
+                    
+                    glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraFront));
+                    glm::vec3 cameraUp = glm::cross(cameraFront, cameraRight);
+
+                    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+                        cameraPos += cameraSpeed * cameraFront;
+                    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+                        cameraPos -= cameraSpeed * cameraFront;
+                    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+                        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+                        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                        */
+
+                }
+                else
+                {
+                    printf("Invalid, ignoring\n");
+                }
             }
             else if (type == PONG)
             {
@@ -151,7 +208,7 @@ int main()
             for (int i = 0; i < numClients; i++)
             {
                 sprintf(temp, "%s&%d&%d,%d,%d", temp, i,
-                    players[clients[i].entity].x, players[clients[i].entity].y, players[clients[i].entity].z);
+                    players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
             }
 
             printf("Dumping, %s\n", temp);
