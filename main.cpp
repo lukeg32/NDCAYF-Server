@@ -90,7 +90,7 @@ int main()
 
         if (!waitingForMsg)
         {
-            printf("Waiting on port %d\nTime: %llu\n", PORT, time);
+            //printf("Waiting on port %d\nTime: %llu\n", PORT, time);
             waitingForMsg = true;
         }
 
@@ -98,13 +98,15 @@ int main()
         {
             waitingForMsg = false;
 
+            /*
             printf("\tMsg %s\n", buf);
-            printf("\tFrom %s\n", inet_ntoa(fromAddr.sin_addr));
             printf("\tAt %llu\n", getMilliSeconds());
+            */
 
             lastPacket.addr = fromAddr;
 
             type = processMsg(buf, ptrPacket);
+            //printf("\tFrom %s %d\n", inet_ntoa(fromAddr.sin_addr), type);
 
             if (type == CONNECT)
             {
@@ -160,10 +162,10 @@ int main()
 
                     getMovePoint(lastPacket, &cameraFront, moves, frontstr, &mvID);
                     players[clients[id].entity].lastMv = mvID;
-                    printf("Process move [%s]:[%s]\n", moves, frontstr);
+                    //printf("Process move [%s]:[%s]\n", moves, frontstr);
 
                     sprintf(both, "%s&%s&", frontstr, moves);
-                    printf("%s\n", both);
+                    //printf("%s\n", both);
                     strcat(players[clients[id].entity].moves, both);
 
                     glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraFront));
@@ -187,7 +189,7 @@ int main()
                             players[clients[id].entity].pos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
                     }
-                    printf("Process done\n");
+                    //printf("Process done\n");
 
 
                 }
@@ -219,13 +221,13 @@ int main()
                     if (i == j)
                     {
                         makeString(start, players[clients[j].entity].pos, players[clients[j].entity].front);
-                        sprintf(temp, "%s&%d&%s&%d", temp, j, start, players[clients[j].entity].lastMv);
+                        sprintf(temp, "%s(%d&%s&%d", temp, j, start, players[clients[j].entity].lastMv);
                     }
                     else
                     {
                         makeString(start, players[clients[j].entity].oldPos, players[clients[j].entity].oldFront);
                         //                         other  id  startpos/front    moves
-                        sprintf(temp, "%s&%d&%s&%s", temp, j, start, players[clients[j].entity].moves);
+                        sprintf(temp, "%s(%d&%s&%s", temp, j, start, players[clients[j].entity].moves);
                     }
 
 
@@ -240,6 +242,7 @@ int main()
                // the old pos is where the other clients start this client, then they use the moves to get to the pos
                players[clients[i].entity].oldPos = players[clients[i].entity].pos;
                players[clients[i].entity].oldFront = players[clients[i].entity].front;
+
 
                // reset the moves list
                strcpy(players[clients[i].entity].moves, "");

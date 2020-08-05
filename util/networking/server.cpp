@@ -89,7 +89,7 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char 
     // get id
     *id = stoi(parts[2]);
 
-    printf("%s\n", moves);
+    //printf("%s\n", moves);
 
 }
 
@@ -145,7 +145,7 @@ int recieve(char buf[], int inSock, sockaddr_in *fromAddr)
 
     recvlen = recvfrom(inSock, buf, BUFSIZE, 0, (struct sockaddr *)fromAddr, &addrlen);
     if (recvlen > 0) {
-        printf("Received %d bytes\n", recvlen);
+    //    printf("Received %d bytes\n", recvlen);
         success = 1;
         buf[recvlen] = 0;
         //printf("From: %s\n", inet_ntoa(fromAddr->sin_addr));
@@ -224,7 +224,7 @@ int processMsg(char msg[], struct MsgPacket *packet)
         }
         else if (ptl == MOVE)
         {
-            printf("Got new move\n");
+            //printf("Got new move\n"); return MOVE;
             return MOVE;
         }
     }
@@ -265,7 +265,7 @@ int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[])
 
     if (type != DUMP)
     {
-    printf("Sending %s\n", msg);
+        printf("Sending %s\n", msg);
     }
 
     if (sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&addr, addrlen) < 0)
