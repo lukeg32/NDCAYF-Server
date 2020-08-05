@@ -1,4 +1,7 @@
+#ifndef NETWORK_H
+#define NETWORK_H
 /*
+ * 
  * store all network constants here,
  * or elsewhere once integrated into
  * the main code, ikc
@@ -31,3 +34,11 @@
 
 // not sure if this value is important enough
 #define BUFSIZE 2048
+
+// a universal key map that all clients will understand 
+#define UNI_FD "w"
+#define UNI_BK "s"
+#define UNI_RT "d"
+#define UNI_LT "a"
+
+#endif

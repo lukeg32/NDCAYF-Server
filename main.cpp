@@ -28,38 +28,18 @@
 using namespace std;
 int clientNum;
 const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+float cameraSpeed = 0.05f;
+
+bool test_nw = false;
 
 int main()
 {
-    struct MsgPacket test;
-    char msg[] = "ndcayfclient$luke$6$2345656745$0$0.0,0.0,0.0&&1234";
-
-    printf("running\n");
-    printf("%d\n", processMsg(msg, &test));
-    /*
-     *
-struct MsgPacket
-{
-    sockaddr_in addr;
-    char name[128];
-    int ptl;
-    int id;
-    char data[4048];
-    unsigned long long time;
-};
-     *
-     */
-    printf("addr %s, name %s, ptl %d, clid %d, data %s, time %llu\n", inet_ntoa(test.addr.sin_addr), test.name, test.ptl, test.id, test.data, test.time);
+    if (test_nw)
+    {
 
 
-    glm::vec3 testFront;
-    char testmoves[10];
-    int testid;
-
-    getMovePoint(test, &testFront, testmoves, &testid);
-    printf("id %d, move %s,  vec %.2f, %.2f, %.2f", testid, testmoves, testFront.x, testFront.y, testFront.z);
-
-    return 0;
+        return 0;
+    }
 
     int sock;
     char buf[BUFSIZE];
@@ -130,8 +110,11 @@ struct MsgPacket
             {
                 int id;
                 // make a new player
-                players[numPlayers].pos = spawns[nextSpawn].front;
+                players[numPlayers].pos.x = spawns[nextSpawn].pos.x;
+                players[numPlayers].pos.y = spawns[nextSpawn].pos.y;
+                players[numPlayers].pos.z = spawns[nextSpawn].pos.z;
                 players[numPlayers].front = spawns[nextSpawn].front;
+                //strcpy(players[numPlayers].moves, "h");
 
                 // use all the spawns
                 nextSpawn++;
@@ -168,24 +151,44 @@ struct MsgPacket
                 {
                     //calculate the position when the packet info is applied
                     glm::vec3 cameraFront;
-                    std:string moves;
-                    int id;
+                    char moves[10];
+                    char frontstr[100];
+                    char both[110];
+                    int mvID;
+                    int id = lastPacket.id;
 
-                    /*
-                    getMovePoint(lastPacket, &cameraFront, &moves, &id);
-                    
+
+                    getMovePoint(lastPacket, &cameraFront, moves, frontstr, &mvID);
+                    players[clients[id].entity].lastMv = mvID;
+                    printf("Process move [%s]:[%s]\n", moves, frontstr);
+
+                    sprintf(both, "%s&%s&", frontstr, moves);
+                    printf("%s\n", both);
+                    strcat(players[clients[id].entity].moves, both);
+
                     glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraFront));
                     glm::vec3 cameraUp = glm::cross(cameraFront, cameraRight);
 
-                    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-                        cameraPos += cameraSpeed * cameraFront;
-                    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-                        cameraPos -= cameraSpeed * cameraFront;
-                    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-                        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-                        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                        */
+                    players[clients[id].entity].front = cameraFront;
+
+                    for (int i = 0; i < strlen(moves); i++)
+                    {
+
+                        if (moves[i] == *UNI_FD)
+                            players[clients[id].entity].pos += cameraSpeed * cameraFront;
+
+                        if (moves[i] == *UNI_BK)
+                            players[clients[id].entity].pos -= cameraSpeed * cameraFront;
+
+                        if (moves[i] == *UNI_LT)
+                            players[clients[id].entity].pos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+                        if (moves[i] == *UNI_RT)
+                            players[clients[id].entity].pos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+                    }
+                    printf("Process done\n");
+
 
                 }
                 else
@@ -204,20 +207,50 @@ struct MsgPacket
         if (time - start >= 100)
         {
             start = time;
-            char temp[BUFSIZE] = "";
+            // for each client
+                // dump each client move with oldPos and oldfront to begin, 
+                // except this one, dump the newpos, and lastmove
             for (int i = 0; i < numClients; i++)
             {
-                sprintf(temp, "%s&%d&%d,%d,%d", temp, i,
+                char temp[BUFSIZE] = "";
+                for (int j = 0; j < numClients; j++)
+                {
+                    char start[40];
+                    if (i == j)
+                    {
+                        makeString(start, players[clients[j].entity].pos, players[clients[j].entity].front);
+                        sprintf(temp, "%s&%d&%s&%d", temp, j, start, players[clients[j].entity].lastMv);
+                    }
+                    else
+                    {
+                        makeString(start, players[clients[j].entity].oldPos, players[clients[j].entity].oldFront);
+                        //                         other  id  startpos/front    moves
+                        sprintf(temp, "%s&%d&%s&%s", temp, j, start, players[clients[j].entity].moves);
+                    }
+
+
+                }
+               /*
+               sprintf(temp, "%s&%d&%.2f,%.2f,%.2f", temp, i,
                     players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
+               sprintf(temp, "%s&%d&%s", temp, i, players[clients[i].entity].moves);
+               */
+
+               // bring the old pos to the current
+               // the old pos is where the other clients start this client, then they use the moves to get to the pos
+               players[clients[i].entity].oldPos = players[clients[i].entity].pos;
+               players[clients[i].entity].oldFront = players[clients[i].entity].front;
+
+               // reset the moves list
+               strcpy(players[clients[i].entity].moves, "");
+
+               printf("================Dumping to %d, [%s]==================\n", i, temp);
+               sendMsg(DUMP, sock, clients[i].addr, temp);
             }
 
-            printf("Dumping, %s\n", temp);
 
-            for (int i = 0; i < numClients; i++)
-            {
-                sendMsg(DUMP, sock, clients[i].addr, temp);
-            }
         }
+
     }
 
     close(sock);

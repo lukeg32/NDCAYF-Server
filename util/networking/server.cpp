@@ -54,7 +54,7 @@ void getParts(std::string parts[], std::string raw, int amount, std::string deli
 }
 
 
-void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], int *id)
+void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id)
 {
     std::string raw = packet.data;
     std::string parts[3];
@@ -68,13 +68,16 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], int *
 
     // get the front raw
     getParts(parts, raw, 3, partdeli);
+    /*
     for (int i = 0; i < 3; i++)
     {
         printf("%s\n", parts[i].c_str());
     }
+    */
 
 
     // get the floats
+    strcpy(frontstr, parts[0].c_str());
     getParts(floats, parts[0], 3, subdeli);
 
     //apply
@@ -86,6 +89,14 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], int *
     // get id
     *id = stoi(parts[2]);
 
+    printf("%s\n", moves);
+
+}
+
+void makeString(char result[], glm::vec3 pos, glm::vec3 front)
+{
+    sprintf(result, "%.2f,%.2f,%.2f&%.2f,%.2f,%.2f",
+        pos.x, pos.y, pos.z, front.x, front.y, front.z);
 }
 
 int makeSocket()
@@ -170,6 +181,7 @@ int processMsg(char msg[], struct MsgPacket *packet)
     char time[256];
     strcpy(clientKey, strtok(msg, "$"));
 
+
     if (strcmp(clientKey, SUPERSECRETKEY_CLIENT) == 0)
     {
         strcpy(name, strtok(NULL, "$"));
@@ -180,10 +192,19 @@ int processMsg(char msg[], struct MsgPacket *packet)
 
         strcpy(time, strtok(NULL, "$"));
 
-        strcpy(idstr, strtok(NULL, "$"));
-        clientID = std::stoi(idstr);
+        // safe guard
+        if (ptl == PING)
+        {
+            clientID = -1;
+            strcpy(data, " ");;
+        }
+        else
+        {
+            strcpy(idstr, strtok(NULL, "$"));
+            clientID = std::stoi(idstr);
+            strcpy(data, strtok(NULL, "$"));
+        }
 
-        strcpy(data, strtok(NULL, "$"));
 
         strcpy(packet->name, name);
         strcpy(packet->data, data);
