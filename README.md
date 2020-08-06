@@ -31,11 +31,15 @@ Lightweight first person shooter focused on multiplayer LAN-based gameplay, and 
 
 ## Current Progress
 * Server response to pings
+* can connect
+* server can recieve from client and update accordingly
+* server sends data 10/sec 
 
 ## Todo
 * add ability to see the lag in ms
-* add ability to "connect" with clients
-* add periodic server dump
+* physics
+* validation
+* bullet stuff
 
 ## Links and Resources
 
