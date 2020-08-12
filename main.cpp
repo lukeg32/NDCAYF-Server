@@ -84,6 +84,7 @@ int main()
 
 
 
+    printf("Starting on port %d\nTime: %llu\n", PORT, start);
     while(true){
         // check inbox
         time = getMilliSeconds();
@@ -206,7 +207,7 @@ int main()
         }
 
         //check time
-        if (time - start >= 100)
+        if (time - start >= SECOND)
         {
             start = time;
             // for each client
