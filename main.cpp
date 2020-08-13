@@ -235,18 +235,6 @@ int main()
 
 
                 }
-               /*
-               sprintf(temp, "%s&%d&%.3f,%.3f,%.3f", temp, i,
-                    players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
-               sprintf(temp, "%s&%d&%s", temp, i, players[clients[i].entity].moves);
-               */
-
-               // bring the old pos to the current
-               // the old pos is where the other clients start this client, then they use the moves to get to the pos
-               players[clients[i].entity].oldPos = players[clients[i].entity].pos;
-               players[clients[i].entity].oldFront = players[clients[i].entity].front;
-
-
 
                printf("================Dumping to %d, [%s]==================\n", i, temp);
                sendMsg(DUMP, sock, clients[i].addr, temp);
@@ -256,6 +244,12 @@ int main()
             {
                // reset the moves list
                strcpy(players[clients[i].entity].moves, "");
+
+
+               // bring the old pos to the current
+               // the old pos is where the other clients start this client, then they use the moves to get to the pos
+               players[clients[i].entity].oldPos = players[clients[i].entity].pos;
+               players[clients[i].entity].oldFront = players[clients[i].entity].front;
             }
 
 
