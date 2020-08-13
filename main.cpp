@@ -245,11 +245,15 @@ int main()
                players[clients[i].entity].oldFront = players[clients[i].entity].front;
 
 
-               // reset the moves list
-               strcpy(players[clients[i].entity].moves, "");
 
                printf("================Dumping to %d, [%s]==================\n", i, temp);
                sendMsg(DUMP, sock, clients[i].addr, temp);
+            }
+
+            for (int i = 0; i < numClients; i++)
+            {
+               // reset the moves list
+               strcpy(players[clients[i].entity].moves, "");
             }
 
 
