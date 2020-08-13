@@ -141,7 +141,7 @@ int main()
 
                 for (int i = 0; i < numClients; i++)
                 {
-                    sprintf(extra, "%s&%d&%.2f,%.2f,%.2f", extra, i,
+                    sprintf(extra, "%s&%d&%.3f,%.3f,%.3f", extra, i,
                         players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
                 }
 
@@ -163,7 +163,8 @@ int main()
 
                     getMovePoint(lastPacket, &cameraFront, moves, frontstr, &mvID);
                     players[clients[id].entity].lastMv = mvID;
-                    //printf("Process move [%s]:[%s]\n", moves, frontstr);
+                    printf("Process move [%s]:[%s], %d", moves, frontstr);
+                    printf(" old[%.3f,%.3f,%.3f]", players[clients[id].entity].pos.x, players[clients[id].entity].pos.y, players[clients[id].entity].pos.z);
 
                     sprintf(both, "%s&%s&", frontstr, moves);
                     //printf("%s\n", both);
@@ -191,6 +192,7 @@ int main()
 
                     }
                     //printf("Process done\n");
+                    printf(" new [%.3f,%.3f,%.3f] %d\n", players[clients[id].entity].pos.x, players[clients[id].entity].pos.y, players[clients[id].entity].pos.z, mvID);
 
 
                 }
@@ -234,7 +236,7 @@ int main()
 
                 }
                /*
-               sprintf(temp, "%s&%d&%.2f,%.2f,%.2f", temp, i,
+               sprintf(temp, "%s&%d&%.3f,%.3f,%.3f", temp, i,
                     players[clients[i].entity].pos.x, players[clients[i].entity].pos.y, players[clients[i].entity].pos.z);
                sprintf(temp, "%s&%d&%s", temp, i, players[clients[i].entity].moves);
                */

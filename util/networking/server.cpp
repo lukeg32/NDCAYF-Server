@@ -81,7 +81,7 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char 
     getParts(floats, parts[0], 3, subdeli);
 
     //apply
-    *front = glm::vec3(std::stof(floats[0]), std::stof(floats[1]), std::stof(floats[2]));
+    *front = glm::vec3(std::stod(floats[0]), std::stod(floats[1]), std::stod(floats[2]));
 
     // the moves
     strcpy(moves, parts[1].c_str());
@@ -95,7 +95,7 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char 
 
 void makeString(char result[], glm::vec3 pos, glm::vec3 front)
 {
-    sprintf(result, "%.2f,%.2f,%.2f&%.2f,%.2f,%.2f",
+    sprintf(result, "%.3f,%.3f,%.3f&%.3f,%.3f,%.3f",
         pos.x, pos.y, pos.z, front.x, front.y, front.z);
 }
 
