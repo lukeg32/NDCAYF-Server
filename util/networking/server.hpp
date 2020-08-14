@@ -45,5 +45,6 @@ int processMsg(char msg[], struct MsgPacket *packet);
 void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id);
 void getParts(std::string parts[], std::string raw, int amount, std::string deli);
 void makeString(char result[], glm::vec3 pos, glm::vec3 front);
+bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int *id);
 
 #endif

@@ -36,7 +36,24 @@ int main()
 {
     if (test_nw)
     {
+        struct sockaddr_in fromAddrr;
+        int num = 0;
+        struct Client client[MAXPLAYERS];
+        int ID;
 
+        memset((char *)&fromAddrr, 0, sizeof(fromAddrr));
+        fromAddrr.sin_family = AF_INET;
+        fromAddrr.sin_addr.s_addr = inet_addr("10.0.0.2");
+        fromAddrr.sin_port = htons(PORT);
+
+        printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
+
+        printf("id %d, num %d\n", ID, num);
+        client[ID].addr = fromAddrr;
+
+        printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
+
+        printf("id %d, num %d\n", ID, num);
 
         return 0;
     }
@@ -59,12 +76,12 @@ int main()
     ptrPacket = &lastPacket;
 
     struct SpawnPoint A;
-    A.pos = glm::vec3(0, 20, 0);
+    A.pos = glm::vec3(20, 20, 0);
     A.front = glm::vec3(0, 0, 0);
 
 
     struct SpawnPoint B;
-    B.pos = glm::vec3(0, -20, 0);
+    B.pos = glm::vec3(0, 20, 20);
     B.front = glm::vec3(10, 10, 10);
 
     struct SpawnPoint spawns[2] = {A, B};
@@ -112,31 +129,52 @@ int main()
             if (type == CONNECT)
             {
                 int id;
-                // make a new player
-                players[numPlayers].pos.x = spawns[nextSpawn].pos.x;
-                players[numPlayers].pos.y = spawns[nextSpawn].pos.y;
-                players[numPlayers].pos.z = spawns[nextSpawn].pos.z;
-                players[numPlayers].front = spawns[nextSpawn].front;
-                //strcpy(players[numPlayers].moves, "h");
 
-                // use all the spawns
-                nextSpawn++;
-                if (nextSpawn == 2)
-                    nextSpawn = 0;
+                // check if this is an old client
+                if (getClientID(lastPacket.addr, &numClients, clients, &id))
+                {
+                    // old client
+                    printf("This is an old client\n");
+                    clients[id].addr = fromAddr;
 
-                // make a client
-                clients[numClients].id = numClients; // useless
-                clients[numClients].addr = fromAddr;
-                clients[numClients].entity = numPlayers;
+                }
+                else
+                {
+                    // new client
 
-                numPlayers++;
+                    // make a new player
+                    players[numPlayers].pos.x = spawns[nextSpawn].pos.x;
+                    players[numPlayers].pos.y = spawns[nextSpawn].pos.y;
+                    players[numPlayers].pos.z = spawns[nextSpawn].pos.z;
+                    players[numPlayers].front = spawns[nextSpawn].front;
+                    //strcpy(players[numPlayers].moves, "h");
 
-                id = numClients;
-                numClients++;
+                    // use all the spawns
+                    nextSpawn++;
+                    if (nextSpawn == 2)
+                        nextSpawn = 0;
+
+
+                    // make a client
+                    clients[id].id = id; // useless
+                    clients[id].addr = fromAddr;
+                    clients[id].entity = numPlayers;
+
+                    numPlayers++;
+
+                    //id = numClients;
+                    //numClients++;
+                    printf("This is an new client %d\n", id);
+
+                }
+                sprintf(extra, "%d", id);
+                sendMsg(type, sock, fromAddr, extra);
+
                 //printf("%d\t%d\n", id, numClients);
 
                 // just tell the client its start, then the client will wait for the dump to actually start
                 // i need to dump all entityes to the new client so it can make them
+                /*
                 sprintf(extra, "%d", id);
 
                 for (int i = 0; i < numClients; i++)
@@ -146,6 +184,7 @@ int main()
                 }
 
                 sendMsg(type, sock, fromAddr, extra);
+                */
             }
             else if (type == MOVE)
             {
@@ -159,6 +198,7 @@ int main()
                     char both[110];
                     int mvID;
                     int id = lastPacket.id;
+                    getClientID(lastPacket.addr, &numClients, clients, &id);
 
 
                     getMovePoint(lastPacket, &cameraFront, moves, frontstr, &mvID);
@@ -209,7 +249,7 @@ int main()
         }
 
         //check time
-        if (time - start >= SECOND)
+        if (time - start >= NORMAL)
         {
             start = time;
             // for each client
@@ -237,6 +277,7 @@ int main()
                 }
 
                printf("================Dumping to %d, [%s]==================\n", i, temp);
+               //printf("addr %s\n", inet_ntoa(clients[i].addr.sin_addr));
                sendMsg(DUMP, sock, clients[i].addr, temp);
             }
 

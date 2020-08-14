@@ -53,6 +53,32 @@ void getParts(std::string parts[], std::string raw, int amount, std::string deli
     parts[cur] = raw;
 }
 
+bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int *id)
+{
+    // if first client then just give 0
+    *id = 0;
+    bool success = false;
+    if (numClients != 0)
+    {
+        for (int i = 0; i < *numClients; i++)
+        {
+            if (clients->addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success)
+            {
+                *id = i;
+                success = true;
+            }
+        }
+
+        if (!success)
+        {
+            *id = *numClients;
+            (*numClients)++;
+        }
+    }
+
+    return success;
+}
+
 
 void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id)
 {
