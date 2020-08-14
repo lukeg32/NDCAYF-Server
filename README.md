@@ -33,7 +33,8 @@ Lightweight first person shooter focused on multiplayer LAN-based gameplay, and 
 * Server response to pings
 * can connect
 * server can recieve from client and update accordingly
-* server sends data 10/sec 
+* server sends data 10/sec or 15/sec or 1/sec
+* connection based off ip so clients can reconnect
 
 ## Todo
 * add ability to see the lag in ms
