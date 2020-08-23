@@ -62,7 +62,8 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
     {
         for (int i = 0; i < *numClients; i++)
         {
-            if (clients->addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success)
+            //printf("========%s = %s\n", inet_ntoa(clients[i].addr.sin_addr), inet_ntoa(addr.sin_addr));
+            if (clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success)
             {
                 *id = i;
                 success = true;
@@ -71,6 +72,7 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
 
         if (!success)
         {
+            // should be safe and only increment when a new addr is put in
             *id = *numClients;
             (*numClients)++;
         }

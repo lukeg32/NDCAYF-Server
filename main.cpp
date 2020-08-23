@@ -134,7 +134,7 @@ int main()
                 if (getClientID(lastPacket.addr, &numClients, clients, &id))
                 {
                     // old client
-                    printf("This is an old client\n");
+                    printf("this is an old client %d\n", numClients);
                     clients[id].addr = fromAddr;
 
                 }
