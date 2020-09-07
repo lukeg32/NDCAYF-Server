@@ -9,8 +9,8 @@
  */
 
 #define PORT  12345
-#define SUPERSECRETKEY_SERVER "ndcayfserver"
-#define SUPERSECRETKEY_CLIENT "ndcayfclient"
+#define SUPERSECRETKEY_SERVER "ndcayfser"
+#define SUPERSECRETKEY_CLIENT "ndcayfcli"
 
 // protocols
 /*

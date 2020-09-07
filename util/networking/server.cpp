@@ -15,27 +15,30 @@
 
 char hostname[128];
 Client clients[MAXPLAYERS];
+struct generalPack buf;
+size_t bufSize = sizeof(struct generalPack);
+socklen_t addrSize = sizeof(struct sockaddr_in);
+
+int actualSock;
+
+void setHostname()
+{
+    gethostname(hostname, 128);
+}
+
+void close()
+{
+    close(actualSock);
+}
 
 using namespace std;
 
-unsigned long long getMilliSeconds()
-{
-    struct timeval tv;
-
-    gettimeofday(&tv, NULL);
-
-    unsigned long long millisecondsSinceEpoch =
-        (unsigned long long)(tv.tv_sec) * 1000 +
-        (unsigned long long)(tv.tv_usec) / 1000;
-
-    return millisecondsSinceEpoch;
-}
 
 void composeMsg(char msg[], char protocol[], char extra[])
 {
-    unsigned long long millisecondsSinceEpoch = getMilliSeconds();
+    //unsigned long long millisecondsSinceEpoch = getMilliSeconds();
 
-    sprintf(msg, "%s$%s$%s$%llu$%s", SUPERSECRETKEY_SERVER, hostname, protocol, millisecondsSinceEpoch, extra);
+    //sprintf(msg, "%s$%s$%s$%llu$%s", SUPERSECRETKEY_SERVER, hostname, protocol, millisecondsSinceEpoch, extra);
 }
 
 
@@ -53,6 +56,8 @@ void getParts(std::string parts[], std::string raw, int amount, std::string deli
     parts[cur] = raw;
 }
 
+// changes id to be the client id
+// returns true if addr was found in clients, id becomes that index
 bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int *id)
 {
     // if first client then just give 0
@@ -129,74 +134,98 @@ void makeString(char result[], glm::vec3 pos, glm::vec3 front)
 
 int makeSocket()
 {
-    struct sockaddr_in myaddr;    /* our address */
+    int success = 0;
     int inSock;
-    char lanReply[128];
+    struct sockaddr_in myaddr;
+    struct timeval tv;
 
+    // gets the hostname and sets it to the var
+    gethostname(hostname, 128);
+
+    // make a socket UDP
     if ((inSock = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
     {
         perror("Cannot create socket\n");
-        return -1;
+        success = -1;
     }
 
-    struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 10000;
 
+    // set a timeout, so it doesn't halt the process
     if (setsockopt(inSock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
     {
         printf("Time out option failed\n");
+        success = -1;
     }
 
-    gethostname(hostname, 128);
-    //sprintf(lanReply, "%s$%s", SUPERSECRETKEY_SERVER, hostname);
-
+    // create the address we listen to
     memset((char *)&myaddr, 0, sizeof(myaddr));
     myaddr.sin_family = AF_INET;
     myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     myaddr.sin_port = htons(PORT);
 
+    // bind to address, and so that recvfrom works without having to send any
     if (bind(inSock, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) {
         perror("Bind failed");
-        return -1;
+        success = -1;
     }
 
-    return inSock;
+    actualSock = inSock;
+
+    return success;
 }
 
 
-int recieve(char buf[], int inSock, sockaddr_in *fromAddr)
-{
-    int recvlen;                                /* # bytes received */
-    int success = -1;
-    socklen_t addrlen = sizeof(*fromAddr);        /* length of addresses */
 
-    recvlen = recvfrom(inSock, buf, BUFSIZE, 0, (struct sockaddr *)fromAddr, &addrlen);
+int recieveNew(struct generalPack *msgPack, struct sockaddr_in *fromAddr)
+{
+    int recvlen = -1;
+    int success = -1;
+
+    recvlen = recvfrom(actualSock, &buf, bufSize, 0, (struct sockaddr *)fromAddr, &addrSize);
+
     if (recvlen > 0) {
-    //    printf("Received %d bytes\n", recvlen);
+        //printf("Received %d bytes\n", recvlen);
         success = 1;
-        buf[recvlen] = 0;
+        *msgPack = buf;
+
+        //printf("%s, %s, %d, %ld, %ld\n", msgPack->key, msgPack->name, msgPack->protocol, msgPack->time.tv_sec, msgPack->time.tv_usec);
         //printf("From: %s\n", inet_ntoa(fromAddr->sin_addr));
     }
 
     return success;
 }
 
-/*
- * msg format rn:
- * delimited by $
- * key
- * name
- * protocol
- * time
- *
- * delimited by &
- * example state
- * objid&x&y&z&rotation&ect
- *
- */
+int sendNew(struct generalPack toSend, struct sockaddr_in toAddr)
+{
+    int success = 0;
+
+    // set the timestamp
+    gettimeofday(&(toSend.time), NULL);
+
+    // send
+    if (sendto(actualSock, (const void *)&toSend, bufSize, 0, (struct sockaddr *)&toAddr, addrSize) < 0)
+    {
+        perror("Failed to send\n");
+        success = -1;
+    }
+
+    return success;
+}
+
+struct generalPack makeBasicPack(int ptl)
+{
+    struct generalPack pack;
+    strcpy(pack.key, SUPERSECRETKEY_SERVER);
+    strcpy(pack.name, hostname);
+    pack.protocol = ptl;
+
+    return pack;
+}
 
 // sees if this is a ping, or a client sending its state
+// literlly useless
 int processMsg(char msg[], struct MsgPacket *packet)
 {
     char clientKey[128];
@@ -265,12 +294,13 @@ int processMsg(char msg[], struct MsgPacket *packet)
 
 
 // send msg
+/*
 int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[])
 {
     char msg[BUFSIZE];
     char num[10];
     bool sendMsg = false;
-    socklen_t addrlen = sizeof(addr);
+    socklen_t addrlena = sizeof(addr);
 
     if (type == PONG)
     {
@@ -296,8 +326,9 @@ int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[])
         printf("Sending %s\n", msg);
     }
 
-    if (sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&addr, addrlen) < 0)
+    if (sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&addr, addrlena) < 0)
     {
         perror("Failed to send a msg\n");
     }
 }
+*/
