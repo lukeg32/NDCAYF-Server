@@ -32,10 +32,6 @@
 #define MAXSERVERS 5
 #define MAXPLAYERS 20
 
-#define FAST 66
-#define NORMAL 100
-#define SECOND 1000
-
 
 // not sure if this value is important enough
 #define BUFSIZE 2048

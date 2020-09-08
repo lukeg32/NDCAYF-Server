@@ -87,6 +87,7 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
 }
 
 
+/*
 void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id)
 {
     std::string raw = packet.data;
@@ -101,12 +102,10 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char 
 
     // get the front raw
     getParts(parts, raw, 3, partdeli);
-    /*
     for (int i = 0; i < 3; i++)
     {
         printf("%s\n", parts[i].c_str());
     }
-    */
 
 
     // get the floats
@@ -125,6 +124,7 @@ void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char 
     //printf("%s\n", moves);
 
 }
+*/
 
 void makeString(char result[], glm::vec3 pos, glm::vec3 front)
 {
@@ -223,112 +223,3 @@ struct generalPack makeBasicPack(int ptl)
 
     return pack;
 }
-
-// sees if this is a ping, or a client sending its state
-// literlly useless
-int processMsg(char msg[], struct MsgPacket *packet)
-{
-    char clientKey[128];
-    char name[128];
-    char protocol[128];
-    char idstr[100];
-    char data[BUFSIZE];
-    int ptl;
-    int clientID;
-    char time[256];
-    strcpy(clientKey, strtok(msg, "$"));
-
-
-    if (strcmp(clientKey, SUPERSECRETKEY_CLIENT) == 0)
-    {
-        strcpy(name, strtok(NULL, "$"));
-
-        // get protocol and make it a number
-        strcpy(protocol, strtok(NULL, "$"));
-        ptl = std::stoi(protocol);
-
-        strcpy(time, strtok(NULL, "$"));
-
-        // safe guard
-        if (ptl == PING)
-        {
-            clientID = -1;
-            strcpy(data, " ");;
-        }
-        else
-        {
-            strcpy(idstr, strtok(NULL, "$"));
-            clientID = std::stoi(idstr);
-            strcpy(data, strtok(NULL, "$"));
-        }
-
-
-        strcpy(packet->name, name);
-        strcpy(packet->data, data);
-        packet->ptl = ptl;
-        packet->time = atoll(time);
-        packet->id = clientID;
-
-        if (ptl == PING)
-        {
-            printf("Send response\n");
-            return PONG;
-        }
-        else if (ptl ==  CONNECT)
-        {
-            printf("\"Connecting\" client\n");
-            return CONNECT;
-        }
-        else if (ptl == MOVE)
-        {
-            //printf("Got new move\n"); return MOVE;
-            return MOVE;
-        }
-    }
-    else
-    {
-        printf("Not a NDCAYF client\n");
-        return -1;
-    }
-}
-
-
-// send msg
-/*
-int sendMsg(int type, int sock, struct sockaddr_in addr, char extra[])
-{
-    char msg[BUFSIZE];
-    char num[10];
-    bool sendMsg = false;
-    socklen_t addrlena = sizeof(addr);
-
-    if (type == PONG)
-    {
-
-        sprintf(num, "%d", PONG);
-        composeMsg(msg, num);
-    }
-    else if (type == CONNECT)
-    {
-        sprintf(num, "%d", CONNECT);
-
-        composeMsg(msg, num, extra);
-    }
-    else if (type == DUMP)
-    {
-        sprintf(num, "%d", DUMP);
-
-        composeMsg(msg, num, extra);
-    }
-
-    if (type != DUMP)
-    {
-        printf("Sending %s\n", msg);
-    }
-
-    if (sendto(sock, msg, strlen(msg), 0, (struct sockaddr *)&addr, addrlena) < 0)
-    {
-        perror("Failed to send a msg\n");
-    }
-}
-*/

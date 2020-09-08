@@ -26,11 +26,9 @@
 #include "util/networking/server.hpp"
 
 using namespace std;
-const glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-float cameraSpeed = 0.05f;
 int nextSpawn = 0;
 
-bool test_nw = true;
+bool test_nw = false;
 
 int getSpawn();
 
@@ -49,169 +47,6 @@ int main()
 {
     if (test_nw)
     {
-
-        // socket inputs
-        struct generalPack *msgPack = new struct generalPack;
-        struct sockaddr_in fromAddr;
-
-
-        struct Entity objects[MAXPLAYERS];
-        int numObjects = 0;
-
-        struct Client clients[MAXPLAYERS];
-        int numClients = 0;
-
-
-        struct SpawnPoint A;
-        A.pos = glm::vec3(20, 20, 0);
-        A.front = glm::vec3(0, 0, 0);
-
-
-        struct SpawnPoint B;
-        B.pos = glm::vec3(0, 20, 20);
-        B.front = glm::vec3(10, 10, 10);
-
-        struct SpawnPoint spawns[2] = {A, B};
-
-
-        if (makeSocket() < 0)
-        {
-            perror("Failed to make a socket\n");
-            return -1;
-        }
-
-        // pre built packets
-        struct generalPack pingPack = makeBasicPack(PING);
-        struct generalPack pongPack = makeBasicPack(PONG);
-        struct generalPack connectPack = makeBasicPack(CONNECT);
-
-        int msgCounter = 0;
-        while(true)
-        {
-            // check inbox
-            if (recieveNew(msgPack, &fromAddr) > 0)
-            {
-                msgCounter++;
-                //printf("%s, %s, %d, %ld, %ld, %d\n", msgPack->key, msgPack->name, msgPack->protocol, msgPack->time.tv_sec, msgPack->time.tv_usec, got);
-                if (msgPack->protocol == PING)
-                {
-                    sendNew(pongPack, fromAddr);
-                }
-                else if (msgPack->protocol == MOVE)
-                {
-                    printf("communsism\n");
-                    struct move movePoint;
-                    int mvID;
-                    int id;
-
-                    movePoint = *((struct move*)(msgPack->data));
-                    memcpy(&mvID, &msgPack->data[sizeof(struct move)], sizeof(int));
-                    printf("%s\n", movePoint.extraActions);
-                    printf("%.2f %.2f %.2f\n", movePoint.pos.x, movePoint.pos.y, movePoint.pos.z);
-                    printf("%d\n", mvID);
-
-
-                    if (true)
-                    {
-                        // get the id
-                        getClientID(fromAddr, &numClients, clients, &id);
-
-                        // update data
-                        objects[clients[id].entity].lastMv = mvID;
-                        objects[clients[id].entity].front = movePoint.dir;
-                        objects[clients[id].entity].pos = movePoint.pos;
-
-                        // add move to list
-                        objects[clients[id].entity].moves[objects[clients[id].entity].numMoves] = movePoint;
-                        objects[clients[id].entity].numMoves++;
-
-                    }
-                }
-                else if (msgPack->protocol == CONNECT)
-                {
-                    int id;
-
-                    // check if this is an old client
-                    if (getClientID(fromAddr, &numClients, clients, &id))
-                    {
-                        // old client
-                        printf("This is an old client %d\n", id);
-
-                    }
-                    else
-                    {
-                        int spawn = getSpawn();
-
-                        // make a new player
-                        objects[numObjects].pos = spawns[spawn].pos;
-                        objects[numObjects].front = spawns[spawn].front;
-
-                        // make a client
-                        clients[id].addr = fromAddr;
-                        clients[id].entity = numObjects;
-
-                        numObjects++;
-
-                        printf("This is an new client %d\n", id);
-
-                    }
-                    strcpy(connectPack.data, (char *)&id);
-
-                    printf("%s, %s, %d, %ld, %ld, %d\n", connectPack.key, connectPack.name, connectPack.protocol, connectPack.time.tv_sec, connectPack.time.tv_usec);
-
-                    sendNew(connectPack, fromAddr);
-                }
-            }
-
-
-            //TODO add timing
-            if (false)
-            {
-
-                // for each client
-                    // dump each client move with oldPos and oldfront to begin,
-                    // except this one, dump the newpos, and lastmove
-                for (int i = 0; i < numClients; i++)
-                {
-                    char temp[BUFSIZE] = "";
-                    for (int j = 0; j < numClients; j++)
-                    {
-                        char start[40];
-                        if (i == j)
-                        {
-                            makeString(start, objects[clients[j].entity].pos, objects[clients[j].entity].front);
-                            sprintf(temp, "%s(%d&%s&%d", temp, j, start, objects[clients[j].entity].lastMv);
-                        }
-                        else
-                        {
-                            makeString(start, objects[clients[j].entity].oldPos, objects[clients[j].entity].oldFront);
-                            //                         other  id  startpos/front    moves
-                            sprintf(temp, "%s(%d&%s&%s", temp, j, start, objects[clients[j].entity].moves);
-                        }
-
-
-                    }
-
-                   printf("================Dumping to %d, [%s]==================\n", i, temp);
-                   //printf("addr %s\n", inet_ntoa(clients[i].addr.sin_addr));
-                   /////////sendMsg(DUMP, sock, clients[i].addr, temp);
-                   //sendNew(pack, clients[j].addr);
-                }
-
-                for (int i = 0; i < numClients; i++)
-                {
-                   // reset the moves list
-                   objects[clients[i].entity].numMoves = 0;
-
-
-                   // bring the old pos to the current
-                   // the old pos is where the other clients start this client, then they use the moves to get to the pos
-                   objects[clients[i].entity].oldPos = objects[clients[i].entity].pos;
-                   objects[clients[i].entity].oldFront = objects[clients[i].entity].front;
-                }
-            }
-        }
-
 
 
         struct sockaddr_in fromAddrr;
@@ -235,6 +70,201 @@ int main()
 
         return 0;
     }
+
+    // socket inputs
+    struct generalPack *msgPack = new struct generalPack;
+    struct sockaddr_in fromAddr;
+
+    // probably only run on fast and medium
+    struct timeval FAST;
+    FAST.tv_sec = 0;
+    FAST.tv_usec = 16666;
+    struct timeval MEDIUM;
+    MEDIUM.tv_sec = 0;
+    MEDIUM.tv_usec = 250000;
+    struct timeval SLOW;
+    SLOW.tv_sec = 1;
+    SLOW.tv_usec = 0;
+
+    struct timeval cur;
+    struct timeval last;
+    gettimeofday(&cur, NULL);
+
+    timeradd(&cur, &SLOW, &last);
+
+
+    struct Entity objects[MAXPLAYERS];
+    int numObjects = 0;
+
+    struct Client clients[MAXPLAYERS];
+    int numClients = 0;
+
+
+    struct SpawnPoint A;
+    A.pos = glm::vec3(20, 20, 0);
+    A.front = glm::vec3(0, 0, 0);
+
+
+    struct SpawnPoint B;
+    B.pos = glm::vec3(0, 20, 20);
+    B.front = glm::vec3(10, 10, 10);
+
+    struct SpawnPoint spawns[2] = {A, B};
+
+
+    if (makeSocket() < 0)
+    {
+        perror("Failed to make a socket\n");
+        return -1;
+    }
+
+    // pre built packets
+    struct generalPack pingPack = makeBasicPack(PING);
+    struct generalPack pongPack = makeBasicPack(PONG);
+    struct generalPack connectPack = makeBasicPack(CONNECT);
+    struct generalPack dumpPack = makeBasicPack(DUMP);
+
+    int msgCounter = 0;
+    while(true)
+    {
+        gettimeofday(&cur, NULL);
+        // check inbox
+        if (recieveNew(msgPack, &fromAddr) > 0)
+        {
+            msgCounter++;
+            //printf("%s, %s, %d, %ld, %ld, %d\n", msgPack->key, msgPack->name, msgPack->protocol, msgPack->time.tv_sec, msgPack->time.tv_usec, got);
+            if (msgPack->protocol == PING)
+            {
+                sendNew(pongPack, fromAddr);
+            }
+            else if (msgPack->protocol == MOVE)
+            {
+                struct move movePoint;
+                unsigned int mvID;
+                int id;
+
+                movePoint = *((struct move*)(msgPack->data));
+                memcpy(&mvID, &msgPack->data[sizeof(struct move)], sizeof(unsigned int));
+                //printf("%s\n", movePoint.extraActions);
+                //printf("%.2f %.2f %.2f\n", movePoint.pos.x, movePoint.pos.y, movePoint.pos.z);
+                //printf("%d\n", mvID);
+
+
+                if (true)
+                {
+                    // get the id
+                    getClientID(fromAddr, &numClients, clients, &id);
+
+                    // update data
+                    objects[clients[id].entity].lastMv = mvID;
+                    objects[clients[id].entity].front = movePoint.dir;
+                    objects[clients[id].entity].pos = movePoint.pos;
+
+                    // add move to list
+                    objects[clients[id].entity].moves[objects[clients[id].entity].numMoves] = movePoint;
+                    objects[clients[id].entity].numMoves++;
+
+                }
+            }
+            else if (msgPack->protocol == CONNECT)
+            {
+                int id;
+
+                // check if this is an old client
+                if (getClientID(fromAddr, &numClients, clients, &id))
+                {
+                    // old client
+                    printf("This is an old client %d\n", id);
+
+                }
+                else
+                {
+                    int spawn = getSpawn();
+
+                    // make a new player
+                    objects[numObjects].pos = spawns[spawn].pos;
+                    objects[numObjects].front = spawns[spawn].front;
+
+                    // make a client
+                    clients[id].addr = fromAddr;
+                    clients[id].entity = numObjects;
+
+                    numObjects++;
+
+                    printf("This is an new client %d\n", id);
+
+                }
+                strcpy(connectPack.data, (char *)&id);
+
+                printf("%s, %s, %d, %ld, %ld, %d\n", connectPack.key, connectPack.name, connectPack.protocol, connectPack.time.tv_sec, connectPack.time.tv_usec);
+
+                sendNew(connectPack, fromAddr);
+            }
+        }
+
+
+        //TODO add timing
+        if (timercmp(&cur, &last, >=))
+        {
+            gettimeofday(&cur, NULL);
+            timeradd(&cur, &SLOW, &last);
+
+            // for each client
+                // dump each client move with oldPos and oldfront to begin,
+                // except this one, dump the newpos, and lastmove
+            for (int i = 0; i < numClients; i++)
+            {
+                int buf = 0;
+                int j = 0;
+                for (j; j < numClients; j++)
+                {
+                    if (i == j)
+                    {
+                        //sprintf(temp, "%s(%d&%s&%d", temp, j, start, objects[clients[j].entity].lastMv);
+                        // send the latest data
+                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[objects[clients[j].entity].numMoves - 1], sizeof(struct move));
+                        buf += sizeof(struct move);
+
+                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].lastMv, sizeof(unsigned int));
+                        buf += sizeof(unsigned int);
+                    }
+                    else
+                    {
+                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].numMoves, sizeof(unsigned short));
+                        buf += sizeof(unsigned short);
+
+                        for (int k = 0; k < objects[clients[j].entity].numMoves; k++)
+                        {
+                            memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[k], sizeof(struct move));
+                            buf += sizeof(struct move);
+                        }
+                    }
+
+                    if (buf >= 1000)
+                    {
+                        printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhhh\n");
+                    }
+
+
+                }
+                dumpPack.numObjects = j;
+
+               printf("================Dumping to %d, bytes %d==================\n", i, buf);
+               printf("addr %s\n", inet_ntoa(clients[i].addr.sin_addr));
+               /////////sendMsg(DUMP, sock, clients[i].addr, temp);
+               printf("%d\n", sizeof(dumpPack));
+               sendNew(dumpPack, clients[i].addr);
+            }
+
+            for (int i = 0; i < numClients; i++)
+            {
+               // reset the moves list
+               objects[clients[i].entity].numMoves = 0;
+            }
+        }
+    }
+
+
 
 
     //printf("Starting on port %d\nTime: %llu\n", PORT, start);
