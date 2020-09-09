@@ -63,6 +63,7 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
     // if first client then just give 0
     *id = 0;
     bool success = false;
+    int freeSlot = -1;
     if (numClients != 0)
     {
         for (int i = 0; i < *numClients; i++)
@@ -73,58 +74,73 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
                 *id = i;
                 success = true;
             }
+
+            // finds the first disconnected player
+            if (clients[i].disconnected && freeSlot == -1)
+            {
+                freeSlot = i;
+            }
         }
 
+        // gets an id for this new player
         if (!success)
         {
-            // should be safe and only increment when a new addr is put in
-            *id = *numClients;
-            (*numClients)++;
+            // if no freeslot then goes to the next one
+            if (freeSlot == -1)
+            {
+                *id = *numClients;
+                (*numClients)++;
+            }
+            else
+            {
+                // uses freeslot
+                *id = freeSlot;
+
+            }
         }
     }
 
     return success;
 }
 
-
-/*
-void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id)
+// gets the difference between two points and checks if the largest distance is too big
+// true for too far, false for not
+bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou)
 {
-    std::string raw = packet.data;
-    std::string parts[3];
-    std::string partdeli("&");
+    bool success = false;
+    glm::vec3 theDiff = abs(*lastGoodPos - *toBeYou);
+    float bigBoi = std::max(theDiff.x, std::max(theDiff.y, theDiff.z));
 
-    std::string floats[3];
-    std::string subdeli(",");
-
-    float x, y, z;
-
-
-    // get the front raw
-    getParts(parts, raw, 3, partdeli);
-    for (int i = 0; i < 3; i++)
+    if (bigBoi > MAXMOVE)
     {
-        printf("%s\n", parts[i].c_str());
+        printf("ERROR caught haxer or trash values: [%.2f, %.2f, %.2f](%.2f)()()\n", toBeYou.x, toBeYou.y, toBeYou.z, bigBoi);
+        success = true;
     }
 
-
-    // get the floats
-    strcpy(frontstr, parts[0].c_str());
-    getParts(floats, parts[0], 3, subdeli);
-
-    //apply
-    *front = glm::vec3(std::stod(floats[0]), std::stod(floats[1]), std::stod(floats[2]));
-
-    // the moves
-    strcpy(moves, parts[1].c_str());
-
-    // get id
-    *id = stoi(parts[2]);
-
-    //printf("%s\n", moves);
+    return success;
 
 }
-*/
+
+// returns true if this is a client that is connected
+bool findClient(sockaddr_in addr, int *numClients, struct Client *clients)
+{
+    bool success = false;
+    if (numClients > 0)
+    {
+        for (int i = 0; i < *numClients; i++)
+        {
+            //printf("========%s = %s\n", inet_ntoa(clients[i].addr.sin_addr), inet_ntoa(addr.sin_addr));
+            if (clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success && !clients[i].disconnected)
+            {
+                success = true;
+            }
+        }
+
+    }
+
+    return success;
+}
+
 
 void makeString(char result[], glm::vec3 pos, glm::vec3 front)
 {
@@ -203,6 +219,7 @@ int sendNew(struct generalPack toSend, struct sockaddr_in toAddr)
 
     // set the timestamp
     gettimeofday(&(toSend.time), NULL);
+    printf("%lu %lu\n", toSend.time.tv_sec, toSend.time.tv_usec);
 
     // send
     if (sendto(actualSock, (const void *)&toSend, bufSize, 0, (struct sockaddr *)&toAddr, addrSize) < 0)

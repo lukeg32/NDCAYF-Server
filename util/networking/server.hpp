@@ -3,9 +3,18 @@
 #include <glm/glm.hpp>
 
 
+struct SpawnPoint
+{
+    glm::vec3 pos;
+    glm::vec3 front;
+};
+
+
 struct Client
 {
     sockaddr_in addr;
+    struct timeval lastResponse;
+    bool disconnected;
     int entity;
 };
 
@@ -25,13 +34,6 @@ struct Entity
     struct move moves[64];
     unsigned short numMoves;
     unsigned int lastMv;
-};
-
-
-struct SpawnPoint
-{
-    glm::vec3 pos;
-    glm::vec3 front;
 };
 
 
@@ -60,6 +62,10 @@ void makeString(char result[], glm::vec3 pos, glm::vec3 front);
 
 int recieveNew(struct generalPack *msgPack, struct sockaddr_in *fromAddr);
 int sendNew(struct generalPack toSend, struct sockaddr_in toAddr);
+
+// validating
+bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou);
+bool findClient(sockaddr_in addr, int *numClients, struct Client *clients);
 
 struct generalPack makeBasicPack(int ptl);
 void setHostname();
