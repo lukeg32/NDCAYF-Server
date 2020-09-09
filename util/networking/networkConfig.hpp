@@ -32,6 +32,8 @@
 #define MAXSERVERS 5
 #define MAXPLAYERS 20
 
+#define MAXMOVE 20
+
 
 // not sure if this value is important enough
 #define BUFSIZE 2048
