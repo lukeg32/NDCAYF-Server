@@ -28,7 +28,7 @@
 using namespace std;
 int nextSpawn = 0;
 
-bool test_nw = false;
+bool test_nw = true;
 
 int getSpawn();
 
@@ -50,6 +50,7 @@ int main()
 
 
         struct sockaddr_in fromAddrr;
+        struct sockaddr_in fromAddrr2;
         int num = 0;
         struct Client client[MAXPLAYERS];
         int ID;
@@ -59,14 +60,30 @@ int main()
         fromAddrr.sin_addr.s_addr = inet_addr("10.0.0.2");
         fromAddrr.sin_port = htons(PORT);
 
+        memset((char *)&fromAddrr2, 0, sizeof(fromAddrr2));
+        fromAddrr2.sin_family = AF_INET;
+        fromAddrr2.sin_addr.s_addr = inet_addr("10.0.0.2");
+        fromAddrr2.sin_port = htons(PORT);
+
         printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
 
         printf("id %d, num %d\n", ID, num);
         client[ID].addr = fromAddrr;
 
         printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
+        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
 
         printf("id %d, num %d\n", ID, num);
+        client[ID].disconnected = true;
+        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
+
+        printf("return value %s\n", getClientID(fromAddrr2, &num, client, &ID) ? "true" : "false");
+
+        printf("id %d, num %d\n", ID, num);
+
+        glm::vec3 you = glm::vec3(0,0,0);
+        glm::vec3 newYou = glm::vec3(0,0,20.001);
+        printf("is bad %s\n", isMovingTooFar(&you, &newYou) ? "true" : "false");
 
         return 0;
     }
@@ -78,7 +95,7 @@ int main()
     // probably only run on fast and medium
     struct timeval FAST;
     FAST.tv_sec = 0;
-    FAST.tv_usec = 16666;
+    FAST.tv_usec = 17000;
     struct timeval MEDIUM;
     MEDIUM.tv_sec = 0;
     MEDIUM.tv_usec = 250000;
@@ -86,11 +103,16 @@ int main()
     SLOW.tv_sec = 1;
     SLOW.tv_usec = 0;
 
+    struct timeval TIMEOUT;
+    TIMEOUT.tv_sec = 10;
+    TIMEOUT.tv_usec = 0;
+
     struct timeval cur;
     struct timeval last;
+    struct timeval timeouthelper;
     gettimeofday(&cur, NULL);
 
-    timeradd(&cur, &SLOW, &last);
+    timeradd(&cur, &FAST, &last);
 
 
     struct Entity objects[MAXPLAYERS];
@@ -150,19 +172,32 @@ int main()
                 //printf("%d\n", mvID);
 
 
-                if (true)
+                if (findClient(fromAddr, &numClients, clients))
                 {
                     // get the id
                     getClientID(fromAddr, &numClients, clients, &id);
+                    // validate that its not a jump to infinity
+                    if (isMovingTooFar(&objects[clients[id].entity].pos, &movePoint.pos))
+                    {
+                        printf("%.2f %.2f %.2f %d\n", movePoint.pos.x, movePoint.pos.x,  movePoint.pos.z, id);
 
-                    // update data
-                    objects[clients[id].entity].lastMv = mvID;
-                    objects[clients[id].entity].front = movePoint.dir;
-                    objects[clients[id].entity].pos = movePoint.pos;
+                        // update data
+                        objects[clients[id].entity].lastMv = mvID;
+                        objects[clients[id].entity].front = movePoint.dir;
+                        objects[clients[id].entity].pos = movePoint.pos;
 
-                    // add move to list
-                    objects[clients[id].entity].moves[objects[clients[id].entity].numMoves] = movePoint;
-                    objects[clients[id].entity].numMoves++;
+                        // update the last response data
+                        gettimeofday(&clients[id].lastResponse, NULL);
+                        clients[id].disconnected = false;
+
+                        // add move to list
+                        objects[clients[id].entity].moves[objects[clients[id].entity].numMoves] = movePoint;
+                        objects[clients[id].entity].numMoves++;
+                    }
+                    else
+                    {
+                        printf("uh you got an issue with your code bud\n");
+                    }
 
                 }
             }
@@ -173,8 +208,18 @@ int main()
                 // check if this is an old client
                 if (getClientID(fromAddr, &numClients, clients, &id))
                 {
-                    // old client
-                    printf("This is an old client %d\n", id);
+                    // old client, should be useless
+                    printf("This is an old client\n");
+                    int spawn = getSpawn();
+
+                    printf("%.2f %.2f %.2f\n", spawns[spawn].pos.x, spawns[spawn].pos.y,  spawns[spawn].pos.z);
+                    objects[clients[id].entity].pos = spawns[spawn].pos;
+                    objects[clients[id].entity].front = spawns[spawn].front;
+
+                    gettimeofday(&clients[id].lastResponse, NULL);
+                    clients[id].disconnected = false;
+                    clients[id].entity = numObjects;
+                    clients[id].addr = fromAddr;
 
                 }
                 else
@@ -188,6 +233,8 @@ int main()
                     // make a client
                     clients[id].addr = fromAddr;
                     clients[id].entity = numObjects;
+                    gettimeofday(&clients[id].lastResponse, NULL);
+                    clients[id].disconnected = false;
 
                     numObjects++;
 
@@ -207,59 +254,86 @@ int main()
         if (timercmp(&cur, &last, >=))
         {
             gettimeofday(&cur, NULL);
-            timeradd(&cur, &SLOW, &last);
+            timeradd(&cur, &FAST, &last);
 
             // for each client
                 // dump each client move with oldPos and oldfront to begin,
                 // except this one, dump the newpos, and lastmove
             for (int i = 0; i < numClients; i++)
             {
-                int buf = 0;
-                int j = 0;
-                for (j; j < numClients; j++)
+                // don't do anything for this player
+                if (!clients[i].disconnected)
                 {
-                    if (i == j)
+                    int buf = 0;
+                    int counter = 0;
+                    for (int j = 0; j < numClients; j++)
                     {
-                        //sprintf(temp, "%s(%d&%s&%d", temp, j, start, objects[clients[j].entity].lastMv);
-                        // send the latest data
-                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[objects[clients[j].entity].numMoves - 1], sizeof(struct move));
-                        buf += sizeof(struct move);
-
-                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].lastMv, sizeof(unsigned int));
-                        buf += sizeof(unsigned int);
-                    }
-                    else
-                    {
-                        memcpy(&dumpPack.data[buf], &objects[clients[j].entity].numMoves, sizeof(unsigned short));
-                        buf += sizeof(unsigned short);
-
-                        for (int k = 0; k < objects[clients[j].entity].numMoves; k++)
+                        // don't get the disconnected players data
+                        if (!clients[j].disconnected)
                         {
-                            memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[k], sizeof(struct move));
-                            buf += sizeof(struct move);
+                            counter++;
+                            if (i == j)
+                            {
+                                //sprintf(temp, "%s(%d&%s&%d", temp, j, start, objects[clients[j].entity].lastMv);
+                                // send the latest data
+                                //printf("%d\n", objects[clients[j].entity].numMoves);
+                                int bestMove = objects[clients[j].entity].numMoves - 1;
+                                if (bestMove < 0)
+                                {
+                                    bestMove = 0;
+                                }
+
+                                memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[bestMove], sizeof(struct move));
+                                buf += sizeof(struct move);
+
+                                memcpy(&dumpPack.data[buf], &objects[clients[j].entity].lastMv, sizeof(unsigned int));
+                                buf += sizeof(unsigned int);
+                            }
+                            else
+                            {
+                                //printf("%d\n", objects[clients[j].entity].numMoves);
+                                memcpy(&dumpPack.data[buf], &objects[clients[j].entity].numMoves, sizeof(unsigned short));
+                                buf += sizeof(unsigned short);
+
+                                for (int k = 0; k < objects[clients[j].entity].numMoves; k++)
+                                {
+                                    memcpy(&dumpPack.data[buf], &objects[clients[j].entity].moves[k], sizeof(struct move));
+                                    buf += sizeof(struct move);
+                                }
+                            }
+
+                            if (buf >= 1000)
+                            {
+                                printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhhh\n");
+                            }
                         }
                     }
 
-                    if (buf >= 1000)
-                    {
-                        printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhhh\n");
-                    }
 
+                    // send data
+                    dumpPack.numObjects = counter;
 
+                    printf("================Dumping to %d, numObjects %d, bytes %d==================", i, counter, buf);
+                    printf("IP: %s ", inet_ntoa(clients[i].addr.sin_addr));
+                    /////////sendMsg(DUMP, sock, clients[i].addr, temp);
+                    sendNew(dumpPack, clients[i].addr);
                 }
-                dumpPack.numObjects = j;
-
-               printf("================Dumping to %d, bytes %d==================\n", i, buf);
-               printf("addr %s\n", inet_ntoa(clients[i].addr.sin_addr));
-               /////////sendMsg(DUMP, sock, clients[i].addr, temp);
-               printf("%d\n", sizeof(dumpPack));
-               sendNew(dumpPack, clients[i].addr);
             }
 
             for (int i = 0; i < numClients; i++)
             {
-               // reset the moves list
-               objects[clients[i].entity].numMoves = 0;
+                // reset the moves list
+                objects[clients[i].entity].numMoves = 0;
+
+                // checks if a player hasn't sent data in a while
+                timeradd(&clients[i].lastResponse, &TIMEOUT, &timeouthelper);
+                if (!clients[i].disconnected && timercmp(&cur, &timeouthelper, >=))
+                {
+                     printf("Disconnecting player %d\n", i);
+                     clients[i].disconnected = true;
+                     int thisone = clients[i].entity;
+                     objects[thisone].numMoves = 0;
+                }
             }
         }
     }
