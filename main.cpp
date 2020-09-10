@@ -28,7 +28,7 @@
 using namespace std;
 int nextSpawn = 0;
 
-bool test_nw = true;
+bool test_nw = false;
 
 int getSpawn();
 
@@ -177,7 +177,7 @@ int main()
                     // get the id
                     getClientID(fromAddr, &numClients, clients, &id);
                     // validate that its not a jump to infinity
-                    if (isMovingTooFar(&objects[clients[id].entity].pos, &movePoint.pos))
+                    if (!isMovingTooFar(&objects[clients[id].entity].pos, &movePoint.pos))
                     {
                         printf("%.2f %.2f %.2f %d\n", movePoint.pos.x, movePoint.pos.x,  movePoint.pos.z, id);
 
@@ -196,7 +196,7 @@ int main()
                     }
                     else
                     {
-                        printf("uh you got an issue with your code bud\n");
+                        printf("nanananananan\n");
                     }
 
                 }
@@ -212,9 +212,15 @@ int main()
                     printf("This is an old client\n");
                     int spawn = getSpawn();
 
-                    printf("%.2f %.2f %.2f\n", spawns[spawn].pos.x, spawns[spawn].pos.y,  spawns[spawn].pos.z);
+                    printf("==SPAWN==%.2f %.2f %.2f\n", spawns[spawn].pos.x, spawns[spawn].pos.y,  spawns[spawn].pos.z);
                     objects[clients[id].entity].pos = spawns[spawn].pos;
                     objects[clients[id].entity].front = spawns[spawn].front;
+
+                    struct move temp;
+                    temp.pos = spawns[spawn].pos;
+                    temp.dir = spawns[spawn].front;
+                    objects[numObjects].moves[0] = temp;
+                    objects[numObjects].numMoves++;
 
                     gettimeofday(&clients[id].lastResponse, NULL);
                     clients[id].disconnected = false;
@@ -229,6 +235,14 @@ int main()
                     // make a new player
                     objects[numObjects].pos = spawns[spawn].pos;
                     objects[numObjects].front = spawns[spawn].front;
+                    printf("==SPAWN==%.2f %.2f %.2f\n", spawns[spawn].pos.x, spawns[spawn].pos.y,  spawns[spawn].pos.z);
+
+                    // sets the spawn b/c .pos and .front are not used rn
+                    struct move temp;
+                    temp.pos = spawns[spawn].pos;
+                    temp.dir = spawns[spawn].front;
+                    objects[numObjects].moves[0] = temp;
+                    objects[numObjects].numMoves++;
 
                     // make a client
                     clients[id].addr = fromAddr;

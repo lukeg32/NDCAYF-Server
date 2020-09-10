@@ -111,9 +111,9 @@ bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou)
     glm::vec3 theDiff = abs(*lastGoodPos - *toBeYou);
     float bigBoi = std::max(theDiff.x, std::max(theDiff.y, theDiff.z));
 
-    if (bigBoi > MAXMOVE)
+    if (isnan(bigBoi))
     {
-        printf("ERROR caught haxer or trash values: [%.2f, %.2f, %.2f](%.2f)()()\n", toBeYou.x, toBeYou.y, toBeYou.z, bigBoi);
+        printf("ERROR caught haxer or trash values: [%.2f, %.2f, %.2f](%.2f)()()\n", toBeYou->x, toBeYou->y, toBeYou->z, bigBoi);
         success = true;
     }
 
