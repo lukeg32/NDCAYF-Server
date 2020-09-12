@@ -145,6 +145,7 @@ int main()
     struct generalPack pongPack = makeBasicPack(PONG);
     struct generalPack connectPack = makeBasicPack(CONNECT);
     struct generalPack dumpPack = makeBasicPack(DUMP);
+    struct generalPack infoPack = makeBasicPack(INFO);
 
     int msgCounter = 0;
     while(true)
@@ -158,6 +159,19 @@ int main()
             if (msgPack->protocol == PING)
             {
                 sendNew(pongPack, fromAddr);
+            }
+            else if (msgPack->protocol == INFO)
+            {
+                struct infoStruct aboutMe;
+                aboutMe.maxPlayers = MAXPLAYERS;
+                aboutMe.curPlayers = getCurClients(clients, &numClients);
+                strcpy(aboutMe.mapName, "your mum");
+                strcpy(aboutMe.gameType, "floaters");
+                aboutMe.isCustom = true;
+
+
+                memcpy(&infoPack.data, &aboutMe, sizeof(struct infoStruct));
+                sendNew(infoPack, fromAddr);
             }
             else if (msgPack->protocol == MOVE)
             {

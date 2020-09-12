@@ -240,3 +240,17 @@ struct generalPack makeBasicPack(int ptl)
 
     return pack;
 }
+
+int getCurClients(struct Client *clients, int *num)
+{
+    int actual = 0;
+    for (int i = 0; i < *num; i++)
+    {
+        if (!clients[i].disconnected)
+        {
+            actual++;
+        }
+    }
+
+    return actual;
+}

@@ -47,6 +47,15 @@ struct generalPack
     char data[1000];
 };
 
+struct infoStruct
+{
+    unsigned short maxPlayers;
+    unsigned short curPlayers;
+    char mapName[25];
+    char gameType[25];
+    bool isCustom;
+};
+
 
 int makeSocket();
 void close();
@@ -62,6 +71,7 @@ void makeString(char result[], glm::vec3 pos, glm::vec3 front);
 
 int recieveNew(struct generalPack *msgPack, struct sockaddr_in *fromAddr);
 int sendNew(struct generalPack toSend, struct sockaddr_in toAddr);
+int getCurClients(struct Client *clients, int *numClients);
 
 // validating
 bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou);

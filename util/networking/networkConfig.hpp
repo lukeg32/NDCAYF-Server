@@ -28,6 +28,7 @@
 #define CONNECT 5
 #define MOVE 6
 #define DUMP 7
+#define INFO 8
 
 #define MAXSERVERS 5
 #define MAXPLAYERS 20
