@@ -51,6 +51,7 @@ int main()
 
         struct sockaddr_in fromAddrr;
         struct sockaddr_in fromAddrr2;
+        struct sockaddr_in fromAddrr3;
         int num = 0;
         struct Client client[MAXPLAYERS];
         int ID;
@@ -65,21 +66,54 @@ int main()
         fromAddrr2.sin_addr.s_addr = inet_addr("10.0.0.2");
         fromAddrr2.sin_port = htons(PORT);
 
+        memset((char *)&fromAddrr3, 0, sizeof(fromAddrr3));
+        fromAddrr3.sin_family = AF_INET;
+        fromAddrr3.sin_addr.s_addr = inet_addr("10.0.0.20");
+        fromAddrr3.sin_port = htons(PORT);
+
+        // add two clients
         printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
 
         printf("id %d, num %d\n", ID, num);
         client[ID].addr = fromAddrr;
 
-        printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
+        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &ID) ? "true" : "false");
+
+        printf("id %d, num %d\n\n", ID, num);
+        client[ID].addr = fromAddrr3;
+        //
+
+        // check they are there and disconnect them
+        int id1, id2;
+        printf("return value %s\n", getClientID(fromAddrr, &num, client, &id1) ? "true" : "false");
+        printf("add1 = %d\n", id1);
+        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &id2) ? "true" : "false");
+        printf("add2 = %d\n", id2);
         printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
+        printf("found them %s\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
 
-        printf("id %d, num %d\n", ID, num);
-        client[ID].disconnected = true;
+        printf("id %d, num %d disconnect\n", id1, num);
+        client[id1].disconnected = true;
+
+        printf("id %d, num %d now disconnect\n\n", id2, num);
+        client[id2].disconnected = true;
+
+        // they should be gone
         printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
+        printf("found them %s\n\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
 
-        printf("return value %s\n", getClientID(fromAddrr2, &num, client, &ID) ? "true" : "false");
 
-        printf("id %d, num %d\n", ID, num);
+        // now reconnect 2, should be 0
+        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &ID) ? "true" : "false");
+
+        printf("id %d, num %d\n\n", ID, num);
+        client[ID].addr = fromAddrr3;
+        client[ID].disconnected = false;
+
+        // validate that its a thing
+        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
+        printf("found them %s\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
+        return 0;
 
         glm::vec3 you = glm::vec3(0,0,0);
         glm::vec3 newYou = glm::vec3(0,0,20.001);
@@ -240,6 +274,7 @@ int main()
                     clients[id].disconnected = false;
                     clients[id].entity = numObjects;
                     clients[id].addr = fromAddr;
+                    objects[clients[id].entity].lastMv = 0;
 
                 }
                 else
@@ -263,6 +298,7 @@ int main()
                     clients[id].entity = numObjects;
                     gettimeofday(&clients[id].lastResponse, NULL);
                     clients[id].disconnected = false;
+                    objects[clients[id].entity].lastMv = 0;
 
                     numObjects++;
 

@@ -68,15 +68,15 @@ bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int 
     {
         for (int i = 0; i < *numClients; i++)
         {
-            //printf("========%s = %s\n", inet_ntoa(clients[i].addr.sin_addr), inet_ntoa(addr.sin_addr));
-            if (clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success)
+            // finds the first match that isn't disconnect
+            if ((clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr) && !success && !clients[i].disconnected)
             {
                 *id = i;
                 success = true;
             }
 
             // finds the first disconnected player
-            if (clients[i].disconnected && freeSlot == -1)
+            if (clients[i].disconnected && (freeSlot == -1))
             {
                 freeSlot = i;
             }
@@ -111,9 +111,9 @@ bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou)
     glm::vec3 theDiff = abs(*lastGoodPos - *toBeYou);
     float bigBoi = std::max(theDiff.x, std::max(theDiff.y, theDiff.z));
 
-    if (isnan(bigBoi))
+    if (isnan(bigBoi) || (bigBoi > MAXMOVE))
     {
-        printf("ERROR caught haxer or trash values: [%.2f, %.2f, %.2f](%.2f)()()\n", toBeYou->x, toBeYou->y, toBeYou->z, bigBoi);
+        printf("ERROR caught haxer or trash values: [%.2f, %.2f, %.2f](%.2f)=================\n", toBeYou->x, toBeYou->y, toBeYou->z, bigBoi);
         success = true;
     }
 
@@ -129,8 +129,8 @@ bool findClient(sockaddr_in addr, int *numClients, struct Client *clients)
     {
         for (int i = 0; i < *numClients; i++)
         {
-            //printf("========%s = %s\n", inet_ntoa(clients[i].addr.sin_addr), inet_ntoa(addr.sin_addr));
-            if (clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr && !success && !clients[i].disconnected)
+            //printf("========%s == %s && %s && %s\n", inet_ntoa(clients[i].addr.sin_addr), inet_ntoa(addr.sin_addr), !success ? "True" : "False", !clients[i].disconnected ? "True" : "False");
+            if ((clients[i].addr.sin_addr.s_addr == addr.sin_addr.s_addr) && !success && !clients[i].disconnected)
             {
                 success = true;
             }
