@@ -24,11 +24,12 @@
 
 #include "util/networking/networkConfig.hpp"
 #include "util/networking/server.hpp"
+#include "util/networking/serverEdit.hpp"
 
 using namespace std;
 int nextSpawn = 0;
 
-bool test_nw = false;
+bool test_nw = true;
 
 int getSpawn();
 
@@ -47,77 +48,8 @@ int main()
 {
     if (test_nw)
     {
-
-
-        struct sockaddr_in fromAddrr;
-        struct sockaddr_in fromAddrr2;
-        struct sockaddr_in fromAddrr3;
-        int num = 0;
-        struct Client client[MAXPLAYERS];
-        int ID;
-
-        memset((char *)&fromAddrr, 0, sizeof(fromAddrr));
-        fromAddrr.sin_family = AF_INET;
-        fromAddrr.sin_addr.s_addr = inet_addr("10.0.0.2");
-        fromAddrr.sin_port = htons(PORT);
-
-        memset((char *)&fromAddrr2, 0, sizeof(fromAddrr2));
-        fromAddrr2.sin_family = AF_INET;
-        fromAddrr2.sin_addr.s_addr = inet_addr("10.0.0.2");
-        fromAddrr2.sin_port = htons(PORT);
-
-        memset((char *)&fromAddrr3, 0, sizeof(fromAddrr3));
-        fromAddrr3.sin_family = AF_INET;
-        fromAddrr3.sin_addr.s_addr = inet_addr("10.0.0.20");
-        fromAddrr3.sin_port = htons(PORT);
-
-        // add two clients
-        printf("return value %s\n", getClientID(fromAddrr, &num, client, &ID) ? "true" : "false");
-
-        printf("id %d, num %d\n", ID, num);
-        client[ID].addr = fromAddrr;
-
-        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &ID) ? "true" : "false");
-
-        printf("id %d, num %d\n\n", ID, num);
-        client[ID].addr = fromAddrr3;
-        //
-
-        // check they are there and disconnect them
-        int id1, id2;
-        printf("return value %s\n", getClientID(fromAddrr, &num, client, &id1) ? "true" : "false");
-        printf("add1 = %d\n", id1);
-        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &id2) ? "true" : "false");
-        printf("add2 = %d\n", id2);
-        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
-        printf("found them %s\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
-
-        printf("id %d, num %d disconnect\n", id1, num);
-        client[id1].disconnected = true;
-
-        printf("id %d, num %d now disconnect\n\n", id2, num);
-        client[id2].disconnected = true;
-
-        // they should be gone
-        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
-        printf("found them %s\n\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
-
-
-        // now reconnect 2, should be 0
-        printf("return value %s\n", getClientID(fromAddrr3, &num, client, &ID) ? "true" : "false");
-
-        printf("id %d, num %d\n\n", ID, num);
-        client[ID].addr = fromAddrr3;
-        client[ID].disconnected = false;
-
-        // validate that its a thing
-        printf("found them %s\n", findClient(fromAddrr, &num, client) ? "true" : "false");
-        printf("found them %s\n", findClient(fromAddrr3, &num, client) ? "true" : "false");
-        return 0;
-
-        glm::vec3 you = glm::vec3(0,0,0);
-        glm::vec3 newYou = glm::vec3(0,0,20.001);
-        printf("is bad %s\n", isMovingTooFar(&you, &newYou) ? "true" : "false");
+        printf("waiting for commands\n");
+        getData();
 
         return 0;
     }
@@ -167,6 +99,7 @@ int main()
 
     struct SpawnPoint spawns[2] = {A, B};
 
+    int movesRecieved = 0;
 
     if (makeSocket() < 0)
     {
@@ -227,7 +160,8 @@ int main()
                     // validate that its not a jump to infinity
                     if (!isMovingTooFar(&objects[clients[id].entity].pos, &movePoint.pos))
                     {
-                        printf("%.2f %.2f %.2f %d\n", movePoint.pos.x, movePoint.pos.x,  movePoint.pos.z, id);
+                        movesRecieved++;
+                        printf("%.2f %.2f %.2f %d ", movePoint.pos.x, movePoint.pos.x,  movePoint.pos.z, id);
 
                         // update data
                         objects[clients[id].entity].lastMv = mvID;
@@ -317,6 +251,12 @@ int main()
         //TODO add timing
         if (timercmp(&cur, &last, >=))
         {
+            // all moves will be printed on one line
+            if (movesRecieved > 0)
+            {
+                movesRecieved = 0;
+                printf("\n");
+            }
             gettimeofday(&cur, NULL);
             timeradd(&cur, &FAST, &last);
 

@@ -36,17 +36,6 @@ struct Entity
     unsigned int lastMv;
 };
 
-
-struct generalPack
-{
-    char key[10];
-    char name[10];
-    unsigned short int protocol;
-    unsigned short int numObjects;
-    struct timeval time;
-    char data[1000];
-};
-
 struct infoStruct
 {
     unsigned short maxPlayers;
@@ -60,24 +49,18 @@ struct infoStruct
 int makeSocket();
 void close();
 
-bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int *id);
-
-// remove
-void composeMsg(char msg[], char protocol[], char extra[] = "none");
-//void getMovePoint(struct MsgPacket packet, glm::vec3 *front, char moves[], char frontstr[], int *id);
-void getParts(std::string parts[], std::string raw, int amount, std::string deli);
-void makeString(char result[], glm::vec3 pos, glm::vec3 front);
-//
-
 int recieveNew(struct generalPack *msgPack, struct sockaddr_in *fromAddr);
 int sendNew(struct generalPack toSend, struct sockaddr_in toAddr);
-int getCurClients(struct Client *clients, int *numClients);
 
 // validating
 bool isMovingTooFar(glm::vec3 *lastGoodPos, glm::vec3 *toBeYou);
 bool findClient(sockaddr_in addr, int *numClients, struct Client *clients);
 
+bool getClientID(sockaddr_in addr, int *numClients, struct Client *clients, int *id);
+int getCurClients(struct Client *clients, int *numClients);
+
 struct generalPack makeBasicPack(int ptl);
 void setHostname();
+char* hostnameGet();
 
 #endif

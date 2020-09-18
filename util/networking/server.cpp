@@ -13,6 +13,8 @@
 #include "networkConfig.hpp"
 #include "server.hpp"
 
+using namespace std;
+
 char hostname[128];
 Client clients[MAXPLAYERS];
 struct generalPack buf;
@@ -26,34 +28,14 @@ void setHostname()
     gethostname(hostname, 128);
 }
 
+char* hostnameGet()
+{
+    return hostname;
+}
+
 void close()
 {
     close(actualSock);
-}
-
-using namespace std;
-
-
-void composeMsg(char msg[], char protocol[], char extra[])
-{
-    //unsigned long long millisecondsSinceEpoch = getMilliSeconds();
-
-    //sprintf(msg, "%s$%s$%s$%llu$%s", SUPERSECRETKEY_SERVER, hostname, protocol, millisecondsSinceEpoch, extra);
-}
-
-
-void getParts(std::string parts[], std::string raw, int amount, std::string deli)
-{
-    size_t pos = 0;
-    int cur = 0;
-    std::string token;
-    while ((pos = raw.find(deli)) != std::string::npos) {
-        token = raw.substr(0, pos);
-        parts[cur] = token;
-        cur++;
-        raw.erase(0, pos + deli.length());
-    }
-    parts[cur] = raw;
 }
 
 // changes id to be the client id
@@ -141,12 +123,6 @@ bool findClient(sockaddr_in addr, int *numClients, struct Client *clients)
     return success;
 }
 
-
-void makeString(char result[], glm::vec3 pos, glm::vec3 front)
-{
-    sprintf(result, "%.3f,%.3f,%.3f&%.3f,%.3f,%.3f",
-        pos.x, pos.y, pos.z, front.x, front.y, front.z);
-}
 
 int makeSocket()
 {
