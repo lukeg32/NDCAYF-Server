@@ -1,9 +1,10 @@
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <netdb.h>
-#include <sys/socket.h>
-#include <sys/time.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
@@ -59,6 +60,20 @@ struct generalTCP makeBasicTCPPack(int ptl)
     return pack;
 }
 
+
+void drawProgress(double percent, int width)
+{
+    cout << "[";
+    int pos = width * percent;
+    for (int i = 0; i < width; ++i) {
+        if (i < pos) cout << "=";
+        else if (i == pos) cout << ">";
+        else cout << " ";
+    }
+    cout << "] " << int(percent * 100.0) << " %\r";
+    cout.flush();
+}
+
 bool getData()
 {
     setHostname();
@@ -82,6 +97,10 @@ bool getData()
     pfd.events = POLLIN | POLLHUP;
     pfd.revents = 0;
 
+    struct winsize w;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    int barWidth = w.ws_col - 7;
+    struct aboutFile information;
 
     int peek;
     bool gotFile = false;
@@ -97,7 +116,7 @@ bool getData()
         if (poll(&pfd, 1, 1000) > 0)
         {
             peek = recv(readSock, &bufT, bufTSize, MSG_PEEK | MSG_DONTWAIT);
-            printf("%d peek\n", peek);
+            //printf("%d peek\n", peek);
 
             // they broke the connection
             if (peek == 0)
@@ -109,7 +128,7 @@ bool getData()
             // error
             if (peek < 0)
             {
-                perror("msg error\n");
+                perror("msg error");
                 return false;
             }
 
@@ -127,11 +146,10 @@ bool getData()
             {
                 len = recv(readSock, &bufT, bufTSize, 0);
 
-                printf("%d bytes: ptl %d\n", len, bufT.protocol);
+                //printf("%d bytes: ptl %d\n", len, bufT.protocol);
                 //printf("%d == %d\n", bufT.protocol, SENDINGFILE);
                 if ((bufT.protocol == SENDINGFILE) && !gettingFile)
                 {
-                    struct aboutFile information;
                     memcpy(&information, &bufT.data, sizeof(struct aboutFile));
                     printf("name %s\n", information.name);
                     printf("type %d\n", information.type);
@@ -148,6 +166,7 @@ bool getData()
 
                     dir += information.name;
                     gettingFile = true;
+                    printf("%s\n", dir.c_str());
                     myfile.open(dir);
                     printf("Ready to recieve file\n");
                 }
@@ -155,65 +174,21 @@ bool getData()
                 {
                     gettingFile = false;
                     gotFile = true;
-                    printf("we have finished\n");
+                    printf("\nWe have finished added %d lines\n", count);
                     myfile.close();
                     //close the file
                 }
                 else if ((bufT.protocol == SENDINGFILE) && gettingFile)
                 {
-                    printf("getting line\n");
+                    //printf("Getting line\n");
                     struct lines theline;
                     memcpy(&theline, &bufT.data, sizeof(struct lines));
-                    //printf("%d::::::[%s]", count, theline.aLine);
-                    myfile << theline.aLine;
+                    drawProgress((float)count / (float)information.lines, barWidth);
+                    //printf("%d::::::[%s]\n", count, theline.aLine);
+                    myfile << theline.aLine << "\n";
                     count++;
                     //printf("%d\n", nextLine.protocol);
                     send(readSock, (const void*)&nextLine, bufTSize, 0);
-
-                    /*
-                        printf("%s\n", filename);
-                        while (notDone)
-                        {
-                            printf("get next\n");
-                            len = recv(readSock, buf2, 2000, 0);
-                            if (strcmp(buf2, "") == 0)
-                            {
-                                //printf("bad%s", buf2);
-                            }
-                            else if (strcmp(buf2, "next?") == 0)
-                            {
-                                send(readSock, "next", sizeof("next"), 0);
-                            }
-                            else
-                            {
-
-                                printf("%d::::::%s", count, buf2);
-                                count++;
-                                if (strcmp(buf2, "end") == 0)
-                                {
-                                    notDone = false;
-                                    printf("exit successfully\n");
-                                }
-                                else
-                                {
-                                    myfile << buf2;
-                                    buf2[0] = '\0';
-                                    send(readSock, "next", sizeof("next"), 0);
-                                }
-                            }
-                        }
-
-                        myfile.close();
-
-                        printf("Saved to %s\n", filename2);
-                        gotFile = true;
-                        //buff[0] = '\0';
-                    }
-                    else
-                    {
-                        //printf("%d bytes: %s\n", len, buf);
-                    }
-                    */
                 }
             }
         }
