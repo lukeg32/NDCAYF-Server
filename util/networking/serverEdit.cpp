@@ -110,10 +110,12 @@ bool getData()
     struct generalTCP nextLine = makeBasicTCPPack(NEXTLINE);
     ofstream myfile;
     int count = 0;
+    int pollValue = 0;
     while (!gotFile)
     {
-
-        if (poll(&pfd, 1, 1000) > 0)
+        pollValue = poll(&pfd, 1, 1000)
+        // to check the status of poll
+        if (pollValue == 0)
         {
             peek = recv(readSock, &bufT, bufTSize, MSG_PEEK | MSG_DONTWAIT);
             //printf("%d peek\n", peek);
@@ -202,6 +204,14 @@ bool getData()
                     }
                 }
             }
+        }
+        else if (pollValue == 0)
+        {
+            printf("Waiting\n");
+        }
+        else
+        {
+            perror("Hmmmmmm");
         }
     }
     printf("we escaped\n");
