@@ -124,7 +124,7 @@ bool getData()
     {
         pollValue = poll(&pfd, 1, 1000);
         // to check the status of poll
-        if (pollValue == 0)
+        if (pollValue > 0)
         {
             peek = recv(readSock, &bufT, bufTSize, MSG_PEEK | MSG_DONTWAIT);
             //printf("%d peek\n", peek);
@@ -218,7 +218,7 @@ bool getData()
         {
             printf("Waiting\n");
         }
-        else
+        else if (pollValue < 0)
         {
             perror("Hmmmmmm");
         }
