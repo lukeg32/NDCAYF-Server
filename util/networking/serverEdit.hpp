@@ -15,7 +15,7 @@ struct generalTCP
     int protocol;
     int numObjects;
     struct timeval time;
-    char data[2000];
+    char data[60000];
 };
 
 struct aboutFile

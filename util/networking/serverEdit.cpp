@@ -117,6 +117,7 @@ bool getData()
     bool gettingFile = false;
     struct generalTCP *get = new struct generalTCP;
     struct generalTCP nextLine = makeBasicTCPPack(NEXTLINE);
+    struct generalTCP timeStamp = makeBasicTCPPack(ENDDOWNLOAD);
     ofstream myfile;
     int count = 0;
     int pollValue = 0;
@@ -127,7 +128,7 @@ bool getData()
         if (pollValue > 0)
         {
             peek = recv(readSock, &bufT, bufTSize, MSG_PEEK | MSG_DONTWAIT);
-            //printf("%d peek\n", peek);
+            //printf("%d PEEK\n", peek);
 
             // they broke the connection
             if (peek == 0)
@@ -155,9 +156,17 @@ bool getData()
             }
             else
             {
-                len = recv(readSock, &bufT, bufTSize, 0);
 
-                //printf("%d bytes: ptl %d\n", len, bufT.protocol);
+                if (peek < sizeof(bufT))
+                {
+                    //printf("Wait for it all\n");
+                    bufT.protocol = -1;
+                }
+                else
+                {
+                    len = recv(readSock, &bufT, bufTSize, 0);
+                    //printf("%d bytes: ptl %d\n", len, bufT.protocol);
+                }
                 //printf("%d == %d\n", bufT.protocol, SENDINGFILE);
                 if ((bufT.protocol == SENDINGFILE) && !gettingFile)
                 {
@@ -205,6 +214,8 @@ bool getData()
                         gotFile = true;
                         printf("\nWe have finished added %d bytes\n", count);
                         myfile.close();
+                        gettimeofday(&timeStamp.time, NULL);
+                        send(readSock, (const void*)&timeStamp, bufTSize, 0);
                     }
                     else
                     {
