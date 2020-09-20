@@ -99,7 +99,7 @@ bool getData()
 
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-    int barWidth = w.ws_col - 7;
+    int barWidth = w.ws_col - 8;
     struct aboutFile information;
 
     int peek;
@@ -170,25 +170,36 @@ bool getData()
                     myfile.open(dir);
                     printf("Ready to recieve file\n");
                 }
-                else if (bufT.protocol == ENDDOWNLOAD)
-                {
-                    gettingFile = false;
-                    gotFile = true;
-                    printf("\nWe have finished added %d lines\n", count);
-                    myfile.close();
-                    //close the file
-                }
-                else if ((bufT.protocol == SENDINGFILE) && gettingFile)
+                else if ((bufT.protocol == SENDINGFILE || bufT.protocol == ENDDOWNLOAD) && gettingFile)
                 {
                     //printf("Getting line\n");
-                    struct lines theline;
-                    memcpy(&theline, &bufT.data, sizeof(struct lines));
+                    //struct lines theline;
+                    //memcpy(&theline, &bufT.data, sizeof(struct lines));
+                    // 
+                    count += bufT.numObjects;
                     drawProgress((float)count / (float)information.lines, barWidth);
-                    //printf("%d::::::[%s]\n", count, theline.aLine);
-                    myfile << theline.aLine << "\n";
-                    count++;
+                    if (bufT.numObjects != sizeof(bufT.data))
+                    {
+                        bufT.data[bufT.numObjects] = '\0';
+                    }
+                    //printf("%d::::::[%s]\n", count, bufT.data);
+                    // the data is dumped in to the data part
+                    myfile << bufT.data;
                     //printf("%d\n", nextLine.protocol);
-                    send(readSock, (const void*)&nextLine, bufTSize, 0);
+
+                    // if enddownload then we aren't gonna get any more data
+                    if (bufT.protocol == ENDDOWNLOAD)
+                    {
+                        gettingFile = false;
+                        gotFile = true;
+                        printf("\nWe have finished added %d bytes\n", count);
+                        myfile.close();
+                    }
+                    else
+                    {
+                        // otherwise ask for more
+                        send(readSock, (const void*)&nextLine, bufTSize, 0);
+                    }
                 }
             }
         }
