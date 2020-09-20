@@ -33,6 +33,15 @@ bool makeTCPSocket()
         success = false;
     }
 
+
+    // so it doesn't fail on the binding
+    int enable = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    {
+        perror("setsockopt(SO_REUSEADDR) failed");
+    }
+
+
     memset((char *)&myaddr, 0, sizeof(myaddr));
     myaddr.sin_family = AF_INET;
     myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -113,7 +122,7 @@ bool getData()
     int pollValue = 0;
     while (!gotFile)
     {
-        pollValue = poll(&pfd, 1, 1000)
+        pollValue = poll(&pfd, 1, 1000);
         // to check the status of poll
         if (pollValue == 0)
         {
