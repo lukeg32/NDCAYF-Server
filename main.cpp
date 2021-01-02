@@ -48,11 +48,16 @@ int main()
 {
     if (test_nw)
     {
+        bool one = true;
+        bool two = true;
+        printf("%d\n", one + two);
         printf("waiting for commands\n");
         getData();
 
         return 0;
     }
+
+    loadModels("scratchpadWorld.json");
 
     // socket inputs
     struct generalPack *msgPack = new struct generalPack;
