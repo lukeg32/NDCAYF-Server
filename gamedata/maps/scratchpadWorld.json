@@ -1,0 +1,164 @@
+{
+    "shaders":[
+        {
+            "name": "generic",
+            "vPath": "util/object/shader/vShader.glsl",
+            "fPath": "util/object/shader/fShader.glsl",
+            "CullFace": "front"
+        },
+        {
+            "name": "instanced",
+            "vPath": "util/object/shader/vInstancedShader.glsl",
+            "fPath": "util/object/shader/fInstancedShader.glsl",
+            "CullFace": "front"
+         }
+
+    ],
+    "models": [
+        {
+            "path": "obj/objects/gunV1.obj",
+            "shaders": ["generic","generic","generic","generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "player",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.7,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": false,
+            "scale": 1.0,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [0.0,-20.0,0.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/player_BLUE.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.2,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [4.0,4.0,4.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/player_ORNG.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.2,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [6.0,4.0,4.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/player_GREN.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.2,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [8.0,4.0,4.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/player_PINK.obj",
+            "shaders": ["generic","generic","generic","generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.2,
+            "isInstanced": false,
+            "meshCountHint": 6,
+            "pos": [10.0,4.0,4.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/Tree03.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.5,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [3.0,4.0,2.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/arch.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "terrain",
+            "mass": 0.0,
+            "inerta": 0.0,
+            "friction" : 0.5,
+            "rotatingfriction" : 0.7,
+            "useSinglePrimitive": true,
+            "primitiveType": "hull",
+            "scale": 0.5,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [7.0,4.0,2.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        },
+        {
+            "path": "obj/objects/plannets/moon.obj",
+            "shaders": ["generic","generic","generic"],
+            "hasPhysics": true,
+            "collisionType": "player",
+            "mass": 1000.0,
+            "inerta": 10.0,
+            "friction" : 0.7,
+            "rotatingfriction" : 0.1,
+            "useSinglePrimitive": true,
+            "primitiveType": "sphere",
+            "primitiveSize": 1.0,
+            "scale": 1.0,
+            "isInstanced": false,
+            "meshCountHint": 2,
+            "pos": [1.0,1.0,2.0],
+            "rotquat": [0.0,0.0,0.0,1.0]
+
+        }
+    ]
+
+}
