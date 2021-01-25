@@ -17,8 +17,8 @@ add_executable(NDCAYF-Server
                 util/networking/server.cpp
                 util/networking/serverEdit.hpp
                 util/networking/serverEdit.cpp
-                util/object/object.cpp
-                util/object/object.h
+                #util/object/object.cpp
+                #util/object/object.h
                 util/json.hpp
                 util/bulletDebug/collisiondebugdrawer.cpp
                 util/bulletDebug/collisiondebugdrawer.hpp

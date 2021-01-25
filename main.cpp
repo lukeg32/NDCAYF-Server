@@ -57,7 +57,7 @@ int main()
         return 0;
     }
 
-    loadModels("scratchpadWorld.json");
+    //loadModels("scratchpadWorld.json");
 
     // socket inputs
     struct generalPack *msgPack = new struct generalPack;
