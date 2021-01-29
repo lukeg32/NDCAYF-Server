@@ -16,10 +16,10 @@ add_executable(NDCAYF-Server
                 main.cpp
                 util/networking/server.hpp
                 util/networking/server.cpp
-                #util/networking/serverEdit.hpp
-                #util/networking/serverEdit.cpp
                 util/networking/serverOOP.hpp
                 util/networking/serverOOP.cpp
+                #util/networking/serverEdit.hpp
+                #util/networking/serverEdit.cpp
                 #util/object/object.cpp
                 #util/object/object.h
                 util/json.hpp
