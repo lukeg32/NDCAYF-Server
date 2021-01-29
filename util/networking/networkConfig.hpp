@@ -9,19 +9,12 @@
  */
 
 #define PORT  12345
-#define PORTTCP  54321
+#define PORTTCP_UPLOAD  54321
+#define PORTTCP_DOWNLOAD  54322
+#define PORTTCP_MUSIC  54323
+#define PORTTCP_VOICE  54324
 #define SUPERSECRETKEY_SERVER "ndcayfser"
 #define SUPERSECRETKEY_CLIENT "ndcayfcli"
-
-// protocols
-/*
-#define PING "ping"
-#define PONG "pong"
-#define CONNECT "connect"
-#define MOVE "imove"
-*/
-
-// helpers
 #define PONG 1
 #define PING 2
 #define STATE 3
@@ -33,6 +26,23 @@
 #define SENDINGFILE 9
 #define NEXTLINE 10
 #define ENDDOWNLOAD 11
+#define STARTSTREAM 12
+#define MORESONG 13
+#define SONGHEADER 14
+#define ENDSONG 15
+
+#define UPLOADFILE 1
+#define DOWNLOADFILE 2
+#define STREAMMUSIC 3
+#define STREAMVOICE 4
+
+#define NUM_BUFFERS 32
+#define BUFFER_SIZE 66000
+#define SOCKET_BUFF 6000
+
+#define POLLOK 0
+#define POLLHUNGUP 1
+#define POLLBAD -1
 
 #define MAP 1
 #define GAMEMODE 2

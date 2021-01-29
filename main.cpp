@@ -24,7 +24,8 @@
 
 #include "util/networking/networkConfig.hpp"
 #include "util/networking/server.hpp"
-#include "util/networking/serverEdit.hpp"
+//#include "util/networking/serverEdit.hpp"
+#include "util/networking/serverOOP.hpp"
 
 using namespace std;
 int nextSpawn = 0;
@@ -52,12 +53,12 @@ int main()
         bool two = true;
         printf("%d\n", one + two);
         printf("waiting for commands\n");
-        getData();
+        TCP(PORTTCP_MUSIC);
 
         return 0;
     }
 
-    loadModels("scratchpadWorld.json");
+    //loadModels("scratchpadWorld.json");
 
     // socket inputs
     struct generalPack *msgPack = new struct generalPack;
