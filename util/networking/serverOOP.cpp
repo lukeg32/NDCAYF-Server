@@ -387,7 +387,7 @@ bool TCP::fileSendMain()
 bool TCP::musicGet()
 {
     ofstream myfile;
-    string thing("out.wav");
+    string thing("Fine.wav");
     myfile.open(thing, ios::binary);
     bool done = false;
     struct musicHeader header;
@@ -503,9 +503,11 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("Start.wav");
+    string thing("Fine.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
+    printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
+    header.sampleRate, header.bitsPerSample, header.dataSize);
     bool done = false;
 
     myfile.open(thing, ios::binary);
@@ -529,7 +531,8 @@ bool TCP::musicMain()
             {
                 toSend.protocol = SONGHEADER;
                 toSend.dataSize = sizeHeader;
-                memcpy(&toSend.data, headerRaw, sizeHeader);
+                memcpy(&toSend.data, &header, sizeof(struct musicHeader));
+                memcpy(&toSend.data[sizeof(struct musicHeader)], headerRaw, sizeHeader);
                 send(sockTCP, (const void*)&toSend, sizeof(toSend), 0);
             }
             else if (bufT.protocol == MORESONG)
