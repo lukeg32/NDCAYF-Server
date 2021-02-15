@@ -8,6 +8,9 @@ libgl1-mesa-dev
 libbullet-dev
 libassimp-dev 
 assimp-utils
+libopenal-dev
+libalut-dev
+libglm-dev
 
 
-sudo apt-get install make cmake  g++ gcc libx11-dev libgl1-mesa-dev libbullet-dev libassimp-dev assimp-utils
+sudo apt-get install make cmake  g++ gcc libx11-dev libgl1-mesa-dev libbullet-dev libassimp-dev assimp-utils libopenal-dev
