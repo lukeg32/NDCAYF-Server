@@ -503,7 +503,7 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("Fine.wav");
+    string thing("Start.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
     printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
