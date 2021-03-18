@@ -46,6 +46,17 @@ int TCP::makeTCP(int port)
         perror("setsockopt(SO_REUSEADDR) failed");
     }
 
+    /*
+    // to make it nonblocking, not sure what for?
+    int on = 1;
+    if (ioctl(listenSock, FIONBIO, (char *)&on) < 0)
+    {
+        perror("ioctl() failed");
+        close(listenSock);
+        exit(-1);
+    }
+    */
+
 
     memset((char *)&myaddr, 0, sizeof(myaddr));
     myaddr.sin_family = AF_INET;
@@ -503,7 +514,7 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("Fine.wav");
+    string thing("Start.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
     printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
@@ -529,6 +540,9 @@ bool TCP::musicMain()
         {
             if (bufT.protocol == STARTSTREAM)
             {
+                std::cout << "sending header" << "\r";
+                std::cout.flush();
+
                 toSend.protocol = SONGHEADER;
                 toSend.dataSize = sizeHeader;
                 memcpy(&toSend.data, &header, sizeof(struct musicHeader));
@@ -539,6 +553,8 @@ bool TCP::musicMain()
             {
                 // math, to send as much as we can, but not the size
                 // of file
+                std::cout << "sending more" << "\r";
+                std::cout.flush();
                 toSend.protocol = MORESONG;
                 int amount = SOCKET_BUFF;
                 if(bufT.dataSize + SOCKET_BUFF > header.dataSize)
@@ -555,6 +571,8 @@ bool TCP::musicMain()
             }
             else if (bufT.protocol == ENDSONG)
             {
+                std::cout << "ending" << "\r";
+                std::cout.flush();
                 // open new file, get info
                 // create new header, send it
                 done = true;
