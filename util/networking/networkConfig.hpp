@@ -30,6 +30,7 @@
 #define MORESONG 13
 #define SONGHEADER 14
 #define ENDSONG 15
+#define SENDINGFILEHEADER 16
 
 #define UPLOADFILE 1
 #define DOWNLOADFILE 2

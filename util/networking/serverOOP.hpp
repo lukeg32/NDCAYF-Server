@@ -51,6 +51,9 @@ class TCP {
 
   public:
     TCP(int port);
+
+    // what the thread runs
+    void runSocket();
   private:
     int sockTCP, listenSock;
     struct sockaddr_in tcpServer;
@@ -72,6 +75,12 @@ class TCP {
     void musicInit();
     bool musicGet();
     void sendPTL(int protocol);
+
+    void fileRecieveMain();
+    std::ofstream* fileGetInit();
+
+    int _port;
+    struct aboutFile information;
 
 
     // packet we send

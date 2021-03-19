@@ -9,6 +9,8 @@
 #include <iostream>
 #include <glm/glm.hpp>
 
+#include <thread>
+
 #include "util/bulletDebug/collisiondebugdrawer.hpp"
 #include "BulletCollision/NarrowPhaseCollision/btRaycastCallback.h"
 
@@ -49,12 +51,15 @@ int main()
 {
     if (test_nw)
     {
-        bool one = true;
-        bool two = true;
-        printf("%d\n", one + two);
-        printf("waiting for commands\n");
-        TCP(PORTTCP_MUSIC);
+        printf("Waiting for commands\n");
+        TCP musicObj(PORTTCP_MUSIC);
+        TCP fileTransfer(PORTTCP_UPLOAD);
 
+        thread musicRunner(&TCP::runSocket, musicObj);
+        thread fileGet(&TCP::runSocket, fileTransfer);
+
+        fileGet.join();
+        musicRunner.join();
         return 0;
     }
 

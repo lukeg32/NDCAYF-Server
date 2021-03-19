@@ -83,6 +83,7 @@ int TCP::makeTCP(int port)
 TCP::TCP(int port)
 {
     // amke the socket
+    _port = port;
     makeTCP(port);
     setHostname();
 
@@ -95,9 +96,16 @@ TCP::TCP(int port)
     }
     */
 
+
+}
+
+
+void TCP::runSocket()
+{
     struct sockaddr from;
     socklen_t lenaddr = sizeof(from);
 
+    printf("listening on port: %d\n", _port);
     sockTCP = accept(listenSock, &from, &lenaddr);
     printf("got a connection\n");
 
@@ -126,30 +134,116 @@ TCP::TCP(int port)
     }
 
     // type specific set up and run
-    if (port == PORTTCP_UPLOAD)
+    if (_port == PORTTCP_UPLOAD)
+    {
+        printf("getting file!\n");
+        fileRecieveMain();
+        //exit(EXIT_FAILURE);
+    }
+    else if (_port == PORTTCP_DOWNLOAD)
     {
         fileSendInit();
-        printf("getting file!\n");
-        exit(EXIT_FAILURE);
-        fileSendMain();
-    }
-    else if (port == PORTTCP_DOWNLOAD)
-    {
         printf("sending file!\n");
+        fileSendMain();
         exit(EXIT_FAILURE);
     }
-    else if (port == PORTTCP_MUSIC)
+    else if (_port == PORTTCP_MUSIC)
     {
         musicInit();
         printf("Streaming music\n");
         musicMain();
     }
-    else if (port == PORTTCP_VOICE)
+    else if (_port == PORTTCP_VOICE)
     {
         printf("Voice channel\n");
         exit(EXIT_FAILURE);
     }
 }
+
+ofstream* TCP::fileGetInit()
+{
+    ofstream* myfile = new ofstream();
+    bool gotIt = false;
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    barWidth = w.ws_col - 8;
+
+    while (!gotIt)
+    {
+        if (getFromPoll(true) == 0)
+        {
+            if (bufT.protocol == SENDINGFILEHEADER)
+            {
+                memcpy(&information, &bufT.data, sizeof(struct aboutFile));
+                printf("name %s\n", information.name);
+                printf("type %d\n", information.type);
+                printf("size %ld\n", information.lines);
+                string dir;
+
+                if (information.type == MAP)
+                {
+                    dir = "gamedata/maps/";
+                }
+                else if (information.type == GAMEMODE)
+                {
+                    dir = "gamedata/gameModes/";
+                }
+
+                dir += information.name;
+                printf("%s\n", dir.c_str());
+                myfile->open(dir);
+                printf("Ready to recieve file\n");
+                gotIt = true;
+            }
+        }
+    }
+
+    return myfile;
+}
+
+void TCP::fileRecieveMain()
+{
+    ofstream* output = fileGetInit();
+    bool running = true;
+    int count = 0;
+
+    printf("Starting\n");
+    while (running)
+    {
+        if (getFromPoll(true) == 0)
+        {
+            if (bufT.protocol == SENDINGFILE)
+            {
+                count += bufT.numObjects;
+                drawProgress((float)count / (float)information.lines, barWidth);
+
+                *output << bufT.data;
+                sendPTL(NEXTLINE);
+            }
+            if (bufT.protocol == ENDDOWNLOAD)
+            {
+                count += bufT.numObjects;
+                drawProgress(1.0f, barWidth);
+
+                // trim extra data off the end
+                if (bufT.numObjects != sizeof(bufT.data))
+                    bufT.data[bufT.numObjects] = '\0';
+
+                *output << bufT.data;
+
+                // confirm exit
+                printf("\nWe have finished added %d bytes\n", count);
+                output->close();
+                sendPTL(ENDDOWNLOAD);
+                running = false;
+            }
+
+        }
+    }
+
+    printf("we escaped\n");
+}
+
 
 
 /**
@@ -261,8 +355,10 @@ bool TCP::waitForKey()
                 success = true;
                 waiting = false;
                 printf("Got the key\n");
+                send(sockTCP, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
             }
         }
+
     }
 
     len = 0;
@@ -514,7 +610,7 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("Start.wav");
+    string thing("songs/Start.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
     printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
