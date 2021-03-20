@@ -285,7 +285,7 @@ void TCP::fileSendInit()
  */
 void TCP::musicInit()
 {
-
+    toSend = makeBasicTCPPack(SENDINGFILE);
 }
 
 /**
@@ -610,7 +610,7 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("songs/Start.wav");
+    string thing("songs/yuve.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
     printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
@@ -623,11 +623,13 @@ bool TCP::musicMain()
     myfile.read(headerRaw, sizeHeader);
     myfile.close();
 
+    long cursor = 0;
+
     bool firstSong = true;
     sendingFile = true;
     bool requested = false;
     printf("sending key\n");
-    send(sockTCP, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
+    //send(sockTCP, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
 
     printf("starting\n");
     while (!done)
@@ -636,32 +638,62 @@ bool TCP::musicMain()
         {
             if (bufT.protocol == STARTSTREAM)
             {
-                std::cout << "sending header" << "\r";
-                std::cout.flush();
+                std::cout << "sending header\n";
 
                 toSend.protocol = SONGHEADER;
                 toSend.dataSize = sizeHeader;
                 memcpy(&toSend.data, &header, sizeof(struct musicHeader));
                 memcpy(&toSend.data[sizeof(struct musicHeader)], headerRaw, sizeHeader);
+                /*
+                std::cout << "size: " << sizeof(toSend) << std::endl;
+                std::cout << "name: " << toSend.name << std::endl;
+                std::cout << "ptl: " << toSend.protocol << std::endl;
+                std::cout << "numObjects: " << toSend.numObjects << std::endl;
+                std::cout << "dataSize: " << toSend.dataSize << std::endl;
+                std::cout << "data: " << toSend.data << std::endl;
+
+
+
+                char *string_ptr = (char *)&toSend;
+                size_t kk = sizeof(struct generalTCP);
+                int k = 0;
+
+                while(kk--)
+                {
+                    if (k == 16)
+                    {
+                        k = 0;
+                        printf("\n");
+                    }
+                    printf("%hhx ", *string_ptr++);
+                    k++;
+                }
+                */
+
                 send(sockTCP, (const void*)&toSend, sizeof(toSend), 0);
+                bufT.protocol = 0;
             }
             else if (bufT.protocol == MORESONG)
             {
                 // math, to send as much as we can, but not the size
                 // of file
-                std::cout << "sending more" << "\r";
-                std::cout.flush();
                 toSend.protocol = MORESONG;
                 int amount = SOCKET_BUFF;
-                if(bufT.dataSize + SOCKET_BUFF > header.dataSize)
+                if((bufT.dataSize + SOCKET_BUFF) > header.dataSize)
                 {
                     // we are at the end
                     amount = header.dataSize - bufT.dataSize;
                     toSend.protocol = ENDSONG;
                 }
 
-                memcpy(&toSend.data, &theData[bufT.dataSize], amount);
-                toSend.dataSize = amount;
+                std::cout << "sending more       " << amount <<"\r";
+                std::cout.flush();
+
+                memcpy(&toSend.data, &theData[cursor], amount);
+
+                cursor += amount;
+                toSend.dataSize = cursor;
+                toSend.numObjects = amount;
 
                 send(sockTCP, (const void*)&toSend, sizeof(toSend), 0);
             }

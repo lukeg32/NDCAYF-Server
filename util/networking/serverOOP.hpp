@@ -22,7 +22,7 @@ struct generalTCP
     int numObjects;
     size_t dataSize;
     struct timeval time;
-    char data[60000];
+    char data[SOCKET_BUFF];
 };
 
 struct musicHeader

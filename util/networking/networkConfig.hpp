@@ -38,8 +38,8 @@
 #define STREAMVOICE 4
 
 #define NUM_BUFFERS 32
-#define BUFFER_SIZE 66000
-#define SOCKET_BUFF 6000
+#define BUFFER_SIZE 60000
+#define SOCKET_BUFF 60000
 
 #define POLLOK 0
 #define POLLHUNGUP 1
