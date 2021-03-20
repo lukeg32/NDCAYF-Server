@@ -18,6 +18,8 @@
 #include <string>
 #include <bit>
 
+#include <thread>
+
 using namespace std;
 
 #include "networkConfig.hpp"
@@ -286,6 +288,9 @@ void TCP::fileSendInit()
 void TCP::musicInit()
 {
     toSend = makeBasicTCPPack(SENDINGFILE);
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    barWidth = w.ws_col - 8;
 }
 
 /**
@@ -610,7 +615,7 @@ bool TCP::musicGet()
 bool TCP::musicMain()
 {
     ifstream myfile;
-    string thing("songs/yuve.wav");
+    string thing("songs/bee.wav");
     struct musicHeader header;
     char* theData = load_wav(thing, header.channels, header.sampleRate, header.bitsPerSample, header.dataSize, header.format);
     printf("channel: %d, sampleRate: %d, bps %d, size: %d\n", header.channels,
@@ -629,7 +634,7 @@ bool TCP::musicMain()
     sendingFile = true;
     bool requested = false;
     printf("sending key\n");
-    //send(sockTCP, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
+    std::thread progressBar(progressBarThread, std::ref(cursor), std::ref(header.dataSize), barWidth);
 
     printf("starting\n");
     while (!done)
@@ -638,7 +643,7 @@ bool TCP::musicMain()
         {
             if (bufT.protocol == STARTSTREAM)
             {
-                std::cout << "sending header\n";
+                std::cout << "\nsending header\n";
 
                 toSend.protocol = SONGHEADER;
                 toSend.dataSize = sizeHeader;
@@ -671,7 +676,6 @@ bool TCP::musicMain()
                 */
 
                 send(sockTCP, (const void*)&toSend, sizeof(toSend), 0);
-                bufT.protocol = 0;
             }
             else if (bufT.protocol == MORESONG)
             {
@@ -679,15 +683,14 @@ bool TCP::musicMain()
                 // of file
                 toSend.protocol = MORESONG;
                 int amount = SOCKET_BUFF;
-                if((bufT.dataSize + SOCKET_BUFF) > header.dataSize)
+                if((cursor + SOCKET_BUFF) > header.dataSize)
                 {
                     // we are at the end
-                    amount = header.dataSize - bufT.dataSize;
+                    std::cout << "done\n";
+                    amount = header.dataSize - cursor;
                     toSend.protocol = ENDSONG;
                 }
 
-                std::cout << "sending more       " << amount <<"\r";
-                std::cout.flush();
 
                 memcpy(&toSend.data, &theData[cursor], amount);
 
@@ -765,6 +768,13 @@ int TCP::getLines(string file)
     return count;
 }
 
+void progressBarThread(long& top, int& bottom, int width)
+{
+    while (top != bottom)
+    {
+        drawProgress((float) top / (float) bottom, width);
+    }
+}
 
 /**
  * makes the pretty progress bar
@@ -772,7 +782,7 @@ int TCP::getLines(string file)
  * @param percent how far along we want this
  * @param width the max width
  */
-void TCP::drawProgress(double percent, int width)
+void drawProgress(double percent, int width)
 {
     cout << "[";
     int pos = width * percent;

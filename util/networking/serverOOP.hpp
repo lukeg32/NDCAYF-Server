@@ -46,6 +46,8 @@ struct lines
     char aLine[200];
 };
 
+void drawProgress(double percent, int width);
+void progressBarThread(long& top, int& bottom, int width);
 
 class TCP {
 
@@ -64,7 +66,6 @@ class TCP {
     bool tcpConnect(char ip[], int type);
     struct generalTCP makeBasicTCPPack(int ptl);
     int getLines(std::string file);
-    void drawProgress(double percent, int width);
     void fileSendInit();
     int getFromPoll(bool waitForFill);
     bool waitForKey();
