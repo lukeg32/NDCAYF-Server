@@ -208,6 +208,7 @@ void TCP::fileRecieveMain()
     ofstream* output = fileGetInit();
     bool running = true;
     int count = 0;
+    sendPTL(NEXTLINE);
 
     printf("Starting\n");
     while (running)
