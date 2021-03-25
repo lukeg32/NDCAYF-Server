@@ -11,12 +11,11 @@ class TCP {
         struct generalTCP& getInBuf();
         struct generalTCP& getOutBuf();
         bool tcpConnect();
-        TCP(char* ip, int port);
+        TCP(int sock);
         virtual void run();
 
     private:
         struct generalTCP makeBasicTCPPack(int ptl);
-        bool makeTCP();
 
         // the in out buffers
         struct generalTCP _toSend;
@@ -26,10 +25,6 @@ class TCP {
         struct pollfd _pfd;
         int _theSock;
 
-
-        // address stuff
-        char* _ip;
-        int _port;
 };
 
 void progressBarThread(long& top, int& bottom, int width);

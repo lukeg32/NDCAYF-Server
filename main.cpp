@@ -52,14 +52,15 @@ int main()
     if (test_nw)
     {
         printf("Waiting for commands\n");
-        TCP musicObj(PORTTCP_MUSIC);
-        TCP fileTransfer(PORTTCP_UPLOAD);
+        //TCP musicObj(PORTTCP_MUSIC);
+        //TCP fileTransfer(PORTTCP_UPLOAD);
 
-        thread musicRunner(&TCP::runSocket, musicObj);
-        thread fileGet(&TCP::runSocket, fileTransfer);
+        //thread musicRunner(&TCP::runSocket, musicObj);
+        //thread fileGet(&TCP::runSocket, fileTransfer);
 
-        fileGet.join();
-        musicRunner.join();
+        FileGet newFile(
+
+        //musicRunner.join();
         return 0;
     }
 

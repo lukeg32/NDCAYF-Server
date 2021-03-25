@@ -258,15 +258,12 @@ bool TCP::tcpConnect()
 
 /**
  * the constructor for the tcp thing
- * @param ip server ip
- * @param type what we are doing with the tcp socket
- * @param file filename for uploading
+ * becausae we are the server, a listener socket will
+ * accept requests and hand it off to us
+ * @param sock the socket we are using
  */
-TCP::TCP(char* ip, int port) : _ip(ip), _port(port)
+TCP::TCP(int sock) : _theSock(sock)
 {
-    // make the socket
-    makeTCP();
-
     // make our in out packets
     _toSend = makeBasicTCPPack(PING);
     _toRecieve = makeBasicTCPPack(PONG);
