@@ -9,4 +9,5 @@ class TCPListener
         virtual void serveClients();
     private:
         int _listenerSock;
+        static int _numThreads = 0;
 }

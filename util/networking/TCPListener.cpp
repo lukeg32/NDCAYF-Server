@@ -17,13 +17,17 @@ TCPListener::TCPListener(int port) : _port(port)
 
 }
 
+
 /**
  * takes the obj and makes a thread for it
+ * TODO implement a thread pool
+ * right now its just gonna work
  * @param connectionHandler the instance of TCP
  */
 void TCPListener::makeThread(TCP& connectionHandler)
 {
-    
+    _numThreads++;
+    thread* newThread = new thread(&TCP::run, connectionHandler);
 }
 
 
@@ -36,7 +40,7 @@ int TCPListener::makeTCP()
     struct sockaddr_in myaddr;
     if ((_listenSock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        perror("failed to make tcp listener");
+        perror("Failed to make tcp listener");
         success = 0;
     }
 

@@ -11,24 +11,6 @@ using namespace std;
 #include "networkConfig.hpp"
 #include "TCP.hpp"
 
-
-/**
- * makes a tcp socket
- * @return success or not
- */
-bool TCP::makeTCP()
-{
-    bool success = true;
-    if ((_theSock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        perror("Socket failed to make\n");
-        success = false;
-    }
-
-    return success;
-}
-
-
 /**
  * tries to connect
  * @return whether we connected or not
