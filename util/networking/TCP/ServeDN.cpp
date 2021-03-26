@@ -16,7 +16,9 @@ using namespace std;
 
 ServeDN::ServeDN(int sock) : TCP(sock)
 {
-    _path = "songs/bee.wav";
+    _path = "gamedata/maps/terrain04.obj";
+
+    makeHeader("terrain04.obj");
 }
 
 
@@ -29,6 +31,11 @@ void ServeDN::makeHeader(string file)
 
     strcpy(_fileInfo.name, file.c_str());
     _fileInfo.type = MAP;
+    cout << "Name: " << _fileInfo.name << endl;
+    cout << "Type: " << _fileInfo.type << endl;
+    cout << "Size: " << _fileInfo.size << endl;
+
+    in_file.close();
 }
 
 

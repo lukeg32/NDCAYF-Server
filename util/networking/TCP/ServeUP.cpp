@@ -70,7 +70,7 @@ void ServeUP::run(atomic<bool>* isDead)
     if (!getHeader())
         printf("oh no header!\n");
 
-    ofstream theFile(getDir(_fileInfo.type, _fileInfo.name));
+    ofstream theFile(getDir(_fileInfo.type, _fileInfo.name), ios::binary);
 
     struct generalTCP& bufIn = getInBuf();
     int count = 0;
@@ -84,7 +84,7 @@ void ServeUP::run(atomic<bool>* isDead)
                 count += bufIn.numObjects;
                 //drawProgress((float)count / (float)information.lines, barWidth);
 
-                theFile << bufIn.data;
+                theFile.write(bufIn.data, bufIn.numObjects);
                 sendPTL(NEXTLINE);
             }
             if (bufIn.protocol == ENDDOWNLOAD)
@@ -92,7 +92,7 @@ void ServeUP::run(atomic<bool>* isDead)
                 count += bufIn.numObjects;
                 //drawProgress(1.0f, barWidth);
 
-                theFile << bufIn.data;
+                theFile.write(bufIn.data, bufIn.numObjects);
 
                 // confirm exit
                 printf("\nWe have finished added %d bytes\n", count);

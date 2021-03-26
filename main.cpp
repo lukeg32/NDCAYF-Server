@@ -28,8 +28,8 @@
 #include "util/networking/server.hpp"
 //#include "util/networking/serverEdit.hpp"
 //#include "util/networking/serverOOP.hpp"
-#include "util/networking/TCP/FileGet.hpp"
-#include "util/networking/TCP/FileUpload.hpp"
+#include "util/networking/TCP/ServeUP.hpp"
+#include "util/networking/TCP/ServeDN.hpp"
 #include "util/networking/TCP/MusicStreamer.hpp"
 #include "util/networking/TCP/TCP.hpp"
 #include "util/networking/TCP/TCPListener.hpp"
@@ -65,7 +65,9 @@ int main()
         //thread fileGet(&TCP::runSocket, fileTransfer);
 
         //FileGet newFile(
-        MusicListener musicProvider;
+        //DnListener musicProvider;
+        //MusicListener musicProvider;
+        UpListener musicProvider;
         musicProvider.serveClients();
 
         //musicRunner.join();
