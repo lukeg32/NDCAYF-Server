@@ -65,6 +65,8 @@ int main()
         //thread fileGet(&TCP::runSocket, fileTransfer);
 
         //FileGet newFile(
+        MusicListener musicProvider;
+        musicProvider.serveClients();
 
         //musicRunner.join();
         return 0;

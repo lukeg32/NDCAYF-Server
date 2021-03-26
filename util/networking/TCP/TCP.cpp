@@ -9,7 +9,7 @@
 #include <atomic>
 
 using namespace std;
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "TCP.hpp"
 
 /**
@@ -74,7 +74,7 @@ bool TCP::waitForKey()
     bool success = false;
     int len = 0;
 
-    int keySize = sizeof(SUPERSECRETKEY_SERVER);
+    int keySize = sizeof(SUPERSECRETKEY_CLIENT);
     char buff[keySize];
 
     int tries = 10000;
@@ -84,7 +84,7 @@ bool TCP::waitForKey()
         if (getFromPoll(false) == 0)
         {
             len = recv(_theSock, buff, keySize, 0);
-            if (strcmp(buff, SUPERSECRETKEY_SERVER) == 0)
+            if (strcmp(buff, SUPERSECRETKEY_CLIENT) == 0)
             {
                 success = true;
                 waiting = false;
@@ -94,7 +94,7 @@ bool TCP::waitForKey()
         //tries--;
         if (tries == 0)
         {
-            send(_theSock, SUPERSECRETKEY_CLIENT, sizeof(SUPERSECRETKEY_CLIENT), 0);
+            send(_theSock, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
             tries = 10000;
         }
     }
@@ -128,6 +128,7 @@ int TCP::getFromPoll(bool waitForFill)
         if (peek == 0)
         {
             printf("They hung up\n");
+            exit(1);
 
             return POLLHUNGUP;
         }

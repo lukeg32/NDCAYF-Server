@@ -2,7 +2,7 @@
 #define TCP_H
 #include <poll.h>
 #include <atomic>
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 
 class TCP {
     public:

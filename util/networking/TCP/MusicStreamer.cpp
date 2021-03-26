@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "MusicStreamer.hpp"
 #include "TCP.hpp"
 
@@ -31,7 +31,7 @@ string getNextSong()
     for (const auto& entry : filesystem::directory_iterator(SONGPATH))
         cout << entry.path() << endl;
 
-    string a = "asdf";
+    string a = ("songs/bee.wav");
     return a;
 }
 

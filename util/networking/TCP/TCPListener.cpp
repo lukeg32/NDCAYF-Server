@@ -13,7 +13,7 @@
 using namespace std;
 mutex mu;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "TCPListener.hpp"
 #include "TCP.hpp"
 

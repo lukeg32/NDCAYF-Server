@@ -35,7 +35,7 @@
 #define STREAMMUSIC 3
 #define STREAMVOICE 4
 
-#define SONGPATH "songs/"
+#define SONGPATH "songs"
 #define MUSIC_BUFFERS 32
 #define MIN_MUSIC_BUFFERS 2
 #define START_MUSIC_BUFFERS 16

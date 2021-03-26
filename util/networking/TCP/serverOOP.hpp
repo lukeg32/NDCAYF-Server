@@ -9,7 +9,7 @@
 #include <AL/alc.h>
 #include <AL/alext.h>
 #include <AL/alut.h>
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 
 
 bool load_wav_file_header(std::ifstream& file, uint8_t& channels, int32_t& sampleRate, uint8_t& bitsPerSample, ALsizei& size);

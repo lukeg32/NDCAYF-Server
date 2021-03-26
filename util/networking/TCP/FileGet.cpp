@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "MusicStreamer.hpp"
 #include "TCP.hpp"
 #include "FileGet.hpp"

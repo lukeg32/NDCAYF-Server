@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "TCP.hpp"
 #include "TCPListener.hpp"
 #include "Listeners.hpp"

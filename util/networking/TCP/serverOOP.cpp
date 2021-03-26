@@ -22,7 +22,7 @@
 
 using namespace std;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "server.hpp"
 #include "serverOOP.hpp"
 

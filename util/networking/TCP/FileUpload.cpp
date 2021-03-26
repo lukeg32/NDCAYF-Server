@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#include "networkConfig.hpp"
+#include "../networkConfig.hpp"
 #include "FileUpload.hpp"
 #include "TCP.hpp"
 
