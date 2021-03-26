@@ -1,13 +1,25 @@
+#ifndef TCPListener_H
+#define TCPListener_H
+#include <atomic>
+#include <thread>
+#include <vector>
+
+#include "TCP.hpp"
 
 class TCPListener
 {
     public:
-        TCPListener::TCPListener(int port);
+        TCPListener(int port);
         int makeTCP();
-        void makeThread(TCP& connectionHandler);
+        void makeThread(TCP* connectionHandler);
         int getConnection();
-        virtual void serveClients();
+        virtual void serveClients() = 0;
+
+        static std::vector<std::thread*> pool;
+        static std::vector<std::atomic<bool>*> isDead;
     private:
         int _listenerSock;
-        static int _numThreads = 0;
-}
+        int _port;
+};
+
+#endif

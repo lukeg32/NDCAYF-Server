@@ -27,7 +27,13 @@
 #include "util/networking/networkConfig.hpp"
 #include "util/networking/server.hpp"
 //#include "util/networking/serverEdit.hpp"
-#include "util/networking/serverOOP.hpp"
+//#include "util/networking/serverOOP.hpp"
+#include "util/networking/FileGet.hpp"
+#include "util/networking/FileUpload.hpp"
+#include "util/networking/MusicStreamer.hpp"
+#include "util/networking/TCP.hpp"
+#include "util/networking/TCPListener.hpp"
+#include "util/networking/Listeners.hpp"
 
 using namespace std;
 int nextSpawn = 0;
@@ -58,7 +64,7 @@ int main()
         //thread musicRunner(&TCP::runSocket, musicObj);
         //thread fileGet(&TCP::runSocket, fileTransfer);
 
-        FileGet newFile(
+        //FileGet newFile(
 
         //musicRunner.join();
         return 0;

@@ -4,16 +4,16 @@
 #include <sys/ioctl.h>
 #include <poll.h>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
 #include "networkConfig.hpp"
-#include "stream.hpp"
 #include "MusicStreamer.hpp"
 #include "TCP.hpp"
 #include "FileGet.hpp"
 
-FileGet::FileGet(char* ip) : TCP(ip, PORTTCP_DOWNLOAD)
+FileGet::FileGet(int sock) : TCP(sock)
 {
 }
 
@@ -62,7 +62,7 @@ bool FileGet::getHeader()
     return gotIt;
 }
 
-void FileGet::run()
+void FileGet::run(atomic<bool>* isDead)
 {
     if (!validate())
         printf("oh no!\n");

@@ -9,12 +9,14 @@
 #include <AL/alc.h>
 #include <AL/alext.h>
 #include <AL/alut.h>
+#include "networkConfig.hpp"
 
 
 bool load_wav_file_header(std::ifstream& file, uint8_t& channels, int32_t& sampleRate, uint8_t& bitsPerSample, ALsizei& size);
 int32_t convert_to_int(char* buffer, size_t len);
 char* load_wav(const std::string& filename, uint8_t& channels, int32_t& sampleRate, uint8_t& bitsPerSample, ALsizei& size, ALenum& format);
 
+/*
 struct generalTCP
 {
     char name[10];
@@ -40,6 +42,7 @@ struct aboutFile
     int type;
     long lines;
 };
+*/
 
 struct lines
 {

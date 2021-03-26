@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <thread>
+#include <atomic>
 
 using namespace std;
 #include "networkConfig.hpp"
@@ -18,11 +19,6 @@ using namespace std;
 bool TCP::validate()
 {
     bool successful = true;
-    if (!tcpConnect())
-    {
-        successful = false;
-        printf("oh no!\n");
-    }
 
     if (!waitForKey())
     {
@@ -205,38 +201,6 @@ struct generalTCP& TCP::getOutBuf()
 }
 
 
-/**
- * connects our tcp socket to the server, sends our key
- * @param ip the server ip
- * @return if we did it
- */
-bool TCP::tcpConnect()
-{
-    bool success = true;
-    struct sockaddr_in tcpServer;
-    socklen_t addrlen = sizeof(tcpServer);
-
-    memset(&tcpServer, 0, addrlen);
-    tcpServer.sin_family = AF_INET;
-    tcpServer.sin_addr.s_addr= inet_addr(_ip);
-    tcpServer.sin_port =  htons(_port);
-
-    // try to connect, if yes then send the key
-    if (connect(_theSock, (struct sockaddr*)&tcpServer, addrlen) < 0)
-    {
-        perror("Connect problems\n");
-        success = false;
-    }
-    else
-    {
-        printf("Sending key\n");
-        send(_theSock, SUPERSECRETKEY_CLIENT, sizeof(SUPERSECRETKEY_CLIENT), 0);
-    }
-
-    return success;
-}
-
-
 
 /**
  * the constructor for the tcp thing
@@ -255,17 +219,6 @@ TCP::TCP(int sock) : _theSock(sock)
     _pfd.events = POLLIN | POLLHUP;
     _pfd.revents = 0;
 
-}
-
-
-/**
- * all things that inherit from tcp must make a run function
- * this function will be the main driver
- * should be able to be run on a thread
- */
-void TCP::run()
-{
-    cout << "Oh no" << endl;
 }
 
 

@@ -21,10 +21,27 @@ find_package(OpenAL REQUIRED)
 
 add_executable(NDCAYF-Server
                 main.cpp
-                util/networking/server.hpp
                 util/networking/server.cpp
-                util/networking/serverOOP.hpp
-                util/networking/serverOOP.cpp
+                util/networking/server.hpp
+                #util/networking/serverOOP.cpp
+                #util/networking/serverOOP.hpp
+
+                util/networking/TCPListener.hpp
+                util/networking/TCPListener.cpp
+                util/networking/TCP.hpp
+                util/networking/TCP.cpp
+
+                util/networking/Listeners.hpp
+                util/networking/Listeners.cpp
+
+                util/networking/FileGet.hpp
+                util/networking/FileGet.cpp
+
+                util/networking/FileUpload.hpp
+                util/networking/FileUpload.cpp
+
+                util/networking/MusicStreamer.hpp
+                util/networking/MusicStreamer.cpp
                 #util/networking/serverEdit.hpp
                 #util/networking/serverEdit.cpp
                 #util/object/object.cpp

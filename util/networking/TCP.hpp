@@ -1,6 +1,8 @@
 #ifndef TCP_H
 #define TCP_H
 #include <poll.h>
+#include <atomic>
+#include "networkConfig.hpp"
 
 class TCP {
     public:
@@ -10,9 +12,8 @@ class TCP {
         int getFromPoll(bool waitForFill);
         struct generalTCP& getInBuf();
         struct generalTCP& getOutBuf();
-        bool tcpConnect();
         TCP(int sock);
-        virtual void run();
+        virtual void run(std::atomic<bool>* isDead) = 0;
 
     private:
         struct generalTCP makeBasicTCPPack(int ptl);

@@ -11,15 +11,11 @@
 using namespace std;
 
 #include "networkConfig.hpp"
-#include "TCP.hpp"
 #include "FileUpload.hpp"
+#include "TCP.hpp"
 
-Upload::Upload(char* ip, string dir, string fileName, int type) : TCP(ip, PORTTCP_UPLOAD)
+Upload::Upload(int sock) : TCP(sock)
 {
-    _path = dir + fileName;
-
-    makeHeader(fileName);
-
 }
 
 
@@ -35,7 +31,7 @@ void Upload::makeHeader(string file)
 }
 
 
-void Upload::run()
+void Upload::run(atomic<bool>* isDead)
 {
     if (!validate())
         printf("oh no!\n");

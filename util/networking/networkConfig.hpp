@@ -1,12 +1,10 @@
 #ifndef NETWORK_H
 #define NETWORK_H
-/*
- * 
- * store all network constants here,
- * or elsewhere once integrated into
- * the main code, idc
- *
- */
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alext.h>
+#include <AL/alut.h>
+
 
 #define PORT  12345
 #define PORTTCP_UPLOAD  54321
@@ -37,7 +35,10 @@
 #define STREAMMUSIC 3
 #define STREAMVOICE 4
 
-#define NUM_BUFFERS 32
+#define SONGPATH "songs/"
+#define MUSIC_BUFFERS 32
+#define MIN_MUSIC_BUFFERS 2
+#define START_MUSIC_BUFFERS 16
 #define BUFFER_SIZE 60000
 #define SOCKET_BUFF 60000
 
@@ -67,6 +68,34 @@ struct generalPack
     int numObjects;
     struct timeval time;
     char data[1000];
+};
+
+
+struct generalTCP
+{
+    char name[10];
+    int protocol;
+    int numObjects;
+    size_t dataSize;
+    struct timeval time;
+    char data[SOCKET_BUFF];
+};
+
+struct musicHeader
+{
+    uint8_t channels;
+    int32_t sampleRate;
+    uint8_t bitsPerSample;
+    ALsizei dataSize;
+    ALenum format;
+    char name[30];
+};
+
+struct aboutFile
+{
+    char name[30];
+    int type;
+    long size;
 };
 
 #endif
