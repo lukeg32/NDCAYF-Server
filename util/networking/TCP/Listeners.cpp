@@ -13,8 +13,8 @@ using namespace std;
 #include "TCP.hpp"
 #include "TCPListener.hpp"
 #include "Listeners.hpp"
-#include "FileGet.hpp"
-#include "FileUpload.hpp"
+#include "ServeUP.hpp"
+#include "ServeDN.hpp"
 #include "MusicStreamer.hpp"
 
 UpListener::UpListener(): TCPListener(PORTTCP_UPLOAD)
@@ -24,11 +24,11 @@ UpListener::UpListener(): TCPListener(PORTTCP_UPLOAD)
 
 void UpListener::serveClients()
 {
-    Upload* newUp;
+    ServeUP* newUp;
     while (true)
     {
         int sock = getConnection();
-        newUp = new Upload(sock);
+        newUp = new ServeUP(sock);
         makeThread(newUp);
     }
 }
@@ -40,11 +40,11 @@ DnListener::DnListener(): TCPListener(PORTTCP_DOWNLOAD)
 
 void DnListener::serveClients()
 {
-    FileGet* newUp;
+    ServeDN* newUp;
     while (true)
     {
         int sock = getConnection();
-        newUp = new FileGet(sock);
+        newUp = new ServeDN(sock);
         makeThread(newUp);
     }
 }

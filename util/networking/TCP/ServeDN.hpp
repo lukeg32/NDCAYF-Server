@@ -1,5 +1,5 @@
-#ifndef FILEUP_H
-#define FILEUP_H
+#ifndef FILEDN_H
+#define FILEDN_H
 #include <iostream>
 #include <atomic>
 

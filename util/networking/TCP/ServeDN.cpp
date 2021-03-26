@@ -14,13 +14,13 @@ using namespace std;
 #include "ServeDN.hpp"
 #include "TCP.hpp"
 
-ServeUP::ServeUP(int sock) : TCP(sock)
+ServeDN::ServeDN(int sock) : TCP(sock)
 {
-    _path = "songs/bee.wav"
+    _path = "songs/bee.wav";
 }
 
 
-void ServeUP::makeHeader(string file)
+void ServeDN::makeHeader(string file)
 {
     ifstream in_file(_path, ios::binary);
 
@@ -32,7 +32,7 @@ void ServeUP::makeHeader(string file)
 }
 
 
-void ServeUP::run(atomic<bool>* isDead)
+void ServeDN::run(atomic<bool>* isDead)
 {
     if (!validate())
         printf("oh no!\n");
