@@ -89,6 +89,8 @@ bool TCP::waitForKey()
                 success = true;
                 waiting = false;
                 printf("Got the key\n");
+                tries = 1;
+                send(_theSock, SUPERSECRETKEY_SERVER, sizeof(SUPERSECRETKEY_SERVER), 0);
             }
         }
         //tries--;
