@@ -26,22 +26,22 @@ add_executable(NDCAYF-Server
                 #util/networking/serverOOP.cpp
                 #util/networking/serverOOP.hpp
 
-                util/networking/TCPListener.hpp
-                util/networking/TCPListener.cpp
-                util/networking/TCP.hpp
-                util/networking/TCP.cpp
+                util/networking/TCP/TCPListener.hpp
+                util/networking/TCP/TCPListener.cpp
+                util/networking/TCP/TCP.hpp
+                util/networking/TCP/TCP.cpp
 
-                util/networking/Listeners.hpp
-                util/networking/Listeners.cpp
+                util/networking/TCP/Listeners.hpp
+                util/networking/TCP/Listeners.cpp
 
-                util/networking/FileGet.hpp
-                util/networking/FileGet.cpp
+                util/networking/TCP/FileGet.hpp
+                util/networking/TCP/FileGet.cpp
 
-                util/networking/FileUpload.hpp
-                util/networking/FileUpload.cpp
+                util/networking/TCP/FileUpload.hpp
+                util/networking/TCP/FileUpload.cpp
 
-                util/networking/MusicStreamer.hpp
-                util/networking/MusicStreamer.cpp
+                util/networking/TCP/MusicStreamer.hpp
+                util/networking/TCP/MusicStreamer.cpp
                 #util/networking/serverEdit.hpp
                 #util/networking/serverEdit.cpp
                 #util/object/object.cpp

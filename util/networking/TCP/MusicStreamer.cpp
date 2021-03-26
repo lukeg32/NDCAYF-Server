@@ -94,16 +94,13 @@ void Music::run(atomic<bool>* isDead)
             }
             else if (inBuf.protocol == ENDSONG)
             {
-                cout << "ending" << "\r";
-                cout.flush();
-                // open new file, get info
-                // create new header, send it
                 done = true;
             }
         }
     }
 
-    printf("Exit\n");
+    printf("\nExit\n");
+    *isDead = true;
 }
 
 char* load_wav(const string& filename, uint8_t& channels, int32_t& sampleRate, uint8_t& bitsPerSample, ALsizei& size, ALenum& format)

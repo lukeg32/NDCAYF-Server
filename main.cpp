@@ -28,12 +28,12 @@
 #include "util/networking/server.hpp"
 //#include "util/networking/serverEdit.hpp"
 //#include "util/networking/serverOOP.hpp"
-#include "util/networking/FileGet.hpp"
-#include "util/networking/FileUpload.hpp"
-#include "util/networking/MusicStreamer.hpp"
-#include "util/networking/TCP.hpp"
-#include "util/networking/TCPListener.hpp"
-#include "util/networking/Listeners.hpp"
+#include "util/networking/TCP/FileGet.hpp"
+#include "util/networking/TCP/FileUpload.hpp"
+#include "util/networking/TCP/MusicStreamer.hpp"
+#include "util/networking/TCP/TCP.hpp"
+#include "util/networking/TCP/TCPListener.hpp"
+#include "util/networking/TCP/Listeners.hpp"
 
 using namespace std;
 int nextSpawn = 0;
