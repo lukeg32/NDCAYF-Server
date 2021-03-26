@@ -34,11 +34,11 @@ add_executable(NDCAYF-Server
                 util/networking/TCP/Listeners.hpp
                 util/networking/TCP/Listeners.cpp
 
-                util/networking/TCP/FileGet.hpp
-                util/networking/TCP/FileGet.cpp
+                util/networking/TCP/ServeUP.hpp
+                util/networking/TCP/ServeUP.cpp
 
-                util/networking/TCP/FileUpload.hpp
-                util/networking/TCP/FileUpload.cpp
+                util/networking/TCP/ServeDN.hpp
+                util/networking/TCP/ServeDN.cpp
 
                 util/networking/TCP/MusicStreamer.hpp
                 util/networking/TCP/MusicStreamer.cpp

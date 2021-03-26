@@ -1,19 +1,19 @@
-#ifndef FILEDN_H
-#define FILEDN_H
+#ifndef FILEUP_H
+#define FILEUP_H
 #include <iostream>
 #include <atomic>
 
 #include "TCP.hpp"
 
-class FileGet: public TCP {
+class ServeDN: public TCP {
     public:
-        FileGet(int sock);
+        ServeDN(int sock);
         void run(std::atomic<bool>* isDead);
     private:
-        bool getHeader();
-        std::string getDir(int type, char* fileName);
+        void makeHeader(std::string file);
 
         struct aboutFile _fileInfo;
+        std::string _path;
 
 
 };

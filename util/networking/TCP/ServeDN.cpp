@@ -11,15 +11,16 @@
 using namespace std;
 
 #include "../networkConfig.hpp"
-#include "FileUpload.hpp"
+#include "ServeDN.hpp"
 #include "TCP.hpp"
 
-Upload::Upload(int sock) : TCP(sock)
+ServeUP::ServeUP(int sock) : TCP(sock)
 {
+    _path = "songs/bee.wav"
 }
 
 
-void Upload::makeHeader(string file)
+void ServeUP::makeHeader(string file)
 {
     ifstream in_file(_path, ios::binary);
 
@@ -31,7 +32,7 @@ void Upload::makeHeader(string file)
 }
 
 
-void Upload::run(atomic<bool>* isDead)
+void ServeUP::run(atomic<bool>* isDead)
 {
     if (!validate())
         printf("oh no!\n");

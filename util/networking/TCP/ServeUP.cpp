@@ -11,13 +11,13 @@ using namespace std;
 #include "../networkConfig.hpp"
 #include "MusicStreamer.hpp"
 #include "TCP.hpp"
-#include "FileGet.hpp"
+#include "ServeUP.hpp"
 
-FileGet::FileGet(int sock) : TCP(sock)
+ServeUP::ServeUP(int sock) : TCP(sock)
 {
 }
 
-string FileGet::getDir(int type, char* fileName)
+string ServeUP::getDir(int type, char* fileName)
 {
     string dir;
     switch (type)
@@ -34,7 +34,7 @@ string FileGet::getDir(int type, char* fileName)
     return dir;
 }
 
-bool FileGet::getHeader()
+bool ServeUP::getHeader()
 {
     bool gotIt = false;
     struct generalTCP& bufIn = getInBuf();
@@ -62,7 +62,7 @@ bool FileGet::getHeader()
     return gotIt;
 }
 
-void FileGet::run(atomic<bool>* isDead)
+void ServeUP::run(atomic<bool>* isDead)
 {
     if (!validate())
         printf("oh no!\n");
