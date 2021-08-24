@@ -17,6 +17,13 @@ using namespace std;
 #include "ServeDN.hpp"
 #include "MusicStreamer.hpp"
 
+/*
+ * this class extends TCPListener
+ * waits for new connections of its type
+ * creates an new TCP object that handles that connection
+ * and then throws that on to a thread managed by TCPListener
+ */
+
 UpListener::UpListener(): TCPListener(PORTTCP_UPLOAD)
 {
 

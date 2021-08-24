@@ -12,6 +12,14 @@ using namespace std;
 #include "../networkConfig.hpp"
 #include "TCP.hpp"
 
+/*
+ * a general object that takes a socket,
+ * and handles sending data to and recieving data from the socket
+ * currently uses a general struct for all communications
+ * also waits for a "key" to verify identity
+ *
+ */
+
 /**
  * tries to connect
  * @return whether we connected or not
@@ -50,7 +58,6 @@ struct generalTCP TCP::makeBasicTCPPack(int ptl)
 /**
  * sends over the socket
  * @param protocol
- * @return
  */
 void TCP::sendPTL(int protocol)
 {
@@ -117,6 +124,7 @@ int TCP::getFromPoll(bool waitForFill)
     int peek;
     int len;
     int packSize = sizeof(_toRecieve);
+    //TODO use poll right nerd
     if (poll(&_pfd, 1, 1000) > 0)
     {
         if (_theSock < 0)

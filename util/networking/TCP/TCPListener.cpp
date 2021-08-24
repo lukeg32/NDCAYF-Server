@@ -17,6 +17,14 @@ mutex mu;
 #include "TCPListener.hpp"
 #include "TCP.hpp"
 
+/*
+ * listens on specified port
+ * TODO add a static method that does the thread garbage collection
+ * returns the socket when it gets it
+ * takes tcp objects that handle connections and puts them on threads which are run till they die
+ *
+ */
+
 vector<std::thread*> TCPListener::pool;
 vector<std::atomic<bool>*> TCPListener::isDead;
 
